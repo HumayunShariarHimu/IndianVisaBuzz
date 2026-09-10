@@ -1,0 +1,76 @@
+#visa-qa-widget{position:fixed;top:28px;right:28px;width:280px;min-width:240px;max-width:420px;min-height:200px;
+  background:linear-gradient(180deg,#111827 0%,#0b1220 100%);border:1px solid rgba(255,255,255,0.08);
+  border-radius:14px;box-shadow:0 12px 34px rgba(0,0,0,0.4),inset 0 1px 0 rgba(255,255,255,0.05);
+  z-index:2147483647;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;overflow:auto;color:#e5e7eb;
+  transition:opacity .2s ease,transform .2s ease;box-sizing:border-box;resize:both;}
+#visa-qa-widget *,#visa-qa-widget *::before,#visa-qa-widget *::after{box-sizing:border-box}
+#visa-qa-widget.dragging{box-shadow:0 20px 44px rgba(0,0,0,0.5)}
+#visa-qa-header{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;
+  background:rgba(255,255,255,0.03);border-bottom:1px solid rgba(255,255,255,0.07);cursor:grab;user-select:none;}
+#visa-qa-widget.dragging #visa-qa-header{cursor:grabbing}
+.brand{display:flex;align-items:center;gap:9px}
+.brand .logo{width:26px;height:26px;display:flex;align-items:center;justify-content:center;flex:none;font-size:18px;
+  filter:drop-shadow(0 2px 5px rgba(59,130,246,0.4));}
+.brand-text{display:flex;flex-direction:column;line-height:1.1}
+.brand-name{font-size:13px;font-weight:700;color:#f8fafc;letter-spacing:.2px}
+.brand-sub{font-size:8.5px;font-weight:600;letter-spacing:1.4px;text-transform:uppercase;color:#60a5fa}
+.close-btn{width:22px;height:22px;display:flex;align-items:center;justify-content:center;border-radius:6px;
+  font-size:18px;line-height:1;cursor:pointer;color:rgba(255,255,255,.5);transition:all .18s ease;}
+.close-btn:hover{color:#fff;background:rgba(239,68,68,.85)}
+#visa-qa-body{padding:12px}
+.field{margin-bottom:9px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.visa-qa-label{display:block;font-size:9.5px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;
+  color:rgba(255,255,255,.45);margin:0 0 4px 1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.visa-qa-label .req{color:#f59e0b;letter-spacing:0;text-transform:none;font-weight:500}
+.visa-qa-input{width:100%;padding:8px 10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
+  border-radius:8px;color:#fff;font-family:inherit;font-size:12.5px;outline:none;
+  transition:border-color .18s ease,background .18s ease,box-shadow .18s ease;}
+.visa-qa-input::placeholder{color:rgba(255,255,255,.3)}
+.visa-qa-input:focus{border-color:#3b82f6;background:rgba(255,255,255,.07);box-shadow:0 0 0 3px rgba(59,130,246,.16)}
+.pass-wrap{position:relative}
+.pass-wrap .visa-qa-input{padding-right:36px}
+.eye{position:absolute;top:50%;right:6px;transform:translateY(-50%);background:none;border:none;cursor:pointer;
+  font-size:13px;opacity:.6;padding:3px;line-height:1;transition:opacity .18s ease;}
+.eye:hover{opacity:1}
+.dropzone{display:flex;align-items:center;gap:8px;padding:9px 10px;border:1.5px dashed rgba(255,255,255,.18);
+  border-radius:8px;cursor:pointer;background:rgba(255,255,255,.02);
+  transition:border-color .18s ease,background .18s ease;}
+.dropzone:hover{border-color:rgba(59,130,246,.6);background:rgba(59,130,246,.06)}
+.dropzone .dz-icon{width:22px;height:22px;flex:none;display:flex;align-items:center;justify-content:center;
+  border-radius:50%;background:rgba(59,130,246,.18);color:#60a5fa;font-size:12px;}
+.dropzone .dz-text{font-size:11.5px;color:rgba(255,255,255,.6);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.dropzone.has-file{border-style:solid;border-color:rgba(34,197,94,.5);background:rgba(34,197,94,.08)}
+.dropzone.has-file .dz-icon{background:rgba(34,197,94,.2);color:#4ade80}
+.dropzone.has-file .dz-text{color:#86efac}
+.pdf-list{list-style:none;margin:7px 0 0;padding:0;display:flex;flex-direction:column;gap:5px}
+.pdf-item{display:flex;align-items:center;gap:6px;padding:5px 7px;border-radius:7px;
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);}
+.pdf-badge{flex:none;font-size:8.5px;font-weight:700;letter-spacing:.3px;padding:2px 6px;border-radius:20px;
+  background:rgba(59,130,246,.2);color:#93c5fd;text-transform:uppercase;}
+.pdf-item:first-child .pdf-badge{background:rgba(245,158,11,.22);color:#fcd34d}
+.pdf-fname{flex:1;min-width:0;font-size:10.5px;color:#e5e7eb;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pdf-size{flex:none;font-size:9px;color:rgba(255,255,255,.4)}
+.pdf-remove{flex:none;width:16px;height:16px;border:none;border-radius:50%;background:rgba(239,68,68,.18);
+  color:#fca5a5;cursor:pointer;font-size:12px;line-height:1;display:flex;align-items:center;justify-content:center;
+  transition:all .15s ease;}
+.pdf-remove:hover{background:rgba(239,68,68,.85);color:#fff}
+.actions{margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.visa-qa-btn{position:relative;overflow:hidden;display:flex;align-items:center;gap:7px;width:100%;padding:9px 10px;
+  border:none;border-radius:9px;color:#fff;font-family:inherit;font-weight:600;font-size:11.5px;text-align:left;
+  cursor:pointer;transition:transform .15s ease,filter .18s ease,box-shadow .2s ease;}
+.visa-qa-btn .ic{font-size:14px;flex:none}
+.visa-qa-btn .lbl{display:flex;flex-direction:column;line-height:1.15;min-width:0}
+.visa-qa-btn .lbl b{font-size:8px;font-weight:700;letter-spacing:.6px;opacity:.85;text-transform:uppercase}
+.visa-qa-btn:hover{transform:translateY(-1px);filter:brightness(1.1)}
+.visa-qa-btn:active{transform:translateY(0);filter:brightness(.95)}
+.visa-qa-btn.step1{background:linear-gradient(135deg,#4f46e5 0%,#7c3aed 100%);box-shadow:0 3px 10px rgba(79,70,229,.45)}
+.visa-qa-btn.step2{background:linear-gradient(135deg,#0891b2 0%,#06b6d4 100%);box-shadow:0 3px 10px rgba(6,182,212,.4)}
+.visa-qa-btn.step3{background:linear-gradient(135deg,#d97706 0%,#f59e0b 100%);box-shadow:0 3px 10px rgba(245,158,11,.4)}
+.visa-qa-btn.step4{background:linear-gradient(135deg,#059669 0%,#10b981 100%);box-shadow:0 3px 10px rgba(16,185,129,.4)}
+.visa-qa-status{margin-top:10px;padding:0 10px;max-height:0;opacity:0;overflow:hidden;font-size:11px;font-weight:500;
+  text-align:center;border-radius:7px;transition:all .22s ease;}
+.visa-qa-status.show{padding:8px 10px;max-height:70px;opacity:1}
+.visa-qa-status.info{background:rgba(59,130,246,.15);color:#93c5fd}
+.visa-qa-status.success{background:rgba(34,197,94,.15);color:#86efac}
+.visa-qa-status.error{background:rgba(239,68,68,.15);color:#fca5a5}
