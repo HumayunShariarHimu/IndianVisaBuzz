@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Admin · IndianVisaBuzz</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<div class="container" style="padding-top:40px;padding-bottom:60px;">
+  <div class="logo" style="margin-bottom:24px;"><div class="logo-icon">🛡️</div>Admin<span>Panel</span></div>
+
+  <div class="license-panel" style="max-width:640px;">
+    <h2 style="font-size:22px;font-weight:800;margin-bottom:6px;">🔑 Generate License Keys</h2>
+    <p style="color:var(--text-secondary);font-size:13px;margin-bottom:20px;">Keys are self‑validating (HMAC). No database needed.</p>
+
+    <label class="visa-qa-label">Admin Secret</label>
+    <input type="password" id="adminSecret" class="visa-qa-input" style="margin-bottom:14px;" placeholder="Paste ADMIN_SECRET" />
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
+      <div>
+        <label class="visa-qa-label">Plan</label>
+        <select id="planSelect" class="visa-qa-input">
+          <option value="1">1 · Trial (7 days)</option>
+          <option value="2">2 · Basic (30 days)</option>
+          <option value="3" selected>3 · Pro (1 year)</option>
+          <option value="4">4 · Enterprise (10 years)</option>
+          <option value="5">5 · Lifetime (never expires)</option>
+        </select>
+      </div>
+      <div>
+        <label class="visa-qa-label">How many</label>
+        <input type="number" id="countInput" class="visa-qa-input" value="1" min="1" max="50" />
+      </div>
+    </div>
+
+    <button class="btn btn-primary" id="genBtn" style="width:100%;justify-content:center;">⚡ Generate Keys</button>
+
+    <div id="output" style="margin-top:20px;"></div>
+  </div>
+</div>
+
+<script>
+(async function () {
+  const $ = (id) => document.getElementById(id);
+  $('genBtn').addEventListener('click', async () => {
+    const adminSecret = $('adminSecret').value;
+    const plan = $('planSelect').value;
+    const count = $('countInput').value;
+    const out = $('output');
+    if (!adminSecret) { out.innerHTML = '<div class="license-status visible error">Enter admin secret.</div>'; return; }
+    out.innerHTML = '<div class="license-status visible info">Generating…</div>';
+    try {
+      const res = await fetch('/api/generate', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ adminSecret, plan, count: parseInt(count, 10) })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'failed');
+      const lines = data.keys.map(k =>
+        `<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 10px;background:rgba(255,255,255,0.04);border-radius:8px;margin-top:6px;font-family:monospace;font-size:13px;">
+          <span>${k.key}</span>
+          <span style="color:var(--text-secondary);font-size:11px;">${k.plan} · ${k.expiresAt ? new Date(k.expiresAt).toLocaleDateString() : 'never'}</span>
+          <button class="btn btn-outline btn-sm" data-copy="${k.key}">Copy</button>
+        </div>`
+      ).join('');
+      out.innerHTML = `<div style="margin-bottom:6px;font-weight:600;">✅ ${data.keys.length} key(s) generated</div>${lines}`;
+      out.querySelectorAll('[data-copy]').forEach(b => b.addEventListener('click', () => {
+        navigator.clipboard.writeText(b.dataset.copy);
+        b.textContent = '✓'; setTimeout(() => b.textContent = 'Copy', 1200);
+      }));
+    } catch (e) {
+      out.innerHTML = `<div class="license-status visible error">❌ ${e.message}</div>`;
+    }
+  });
+})();
+</script>
+</body>
+</html>
