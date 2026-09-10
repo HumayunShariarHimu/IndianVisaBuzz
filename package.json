@@ -1,0 +1,15 @@
+{
+  "name": "indianvisabuzz",
+  "version": "1.0.0",
+  "description": "Evergreen Indian Visa automation suite — HMAC license system, no DB required.",
+  "scripts": {
+    "dev": "vercel dev",
+    "gen": "node scripts/gen-key.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "vercel": "^34.0.0"
+  }
+}
