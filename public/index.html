@@ -3,18 +3,18 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>IndianVisaBuzz – Visa Automation Suite</title>
+<meta name="description" content="IndianVisaBuzz is a free Chrome Extension for assisted Indian visa application automation." />
+<title>IndianVisaBuzz – Free Indian Visa Automation Assistant</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-
 <div class="container">
-  <nav class="navbar">
-    <div class="logo"><div class="logo-icon">⚡</div>Indian<span>VisaBuzz</span></div>
+  <nav class="navbar" aria-label="Main navigation">
+    <a class="logo" href="/" aria-label="IndianVisaBuzz home"><div class="logo-icon">⚡</div>Indian<span>VisaBuzz</span></a>
     <div class="nav-links">
       <a href="#features">Features</a>
-      <a href="#license">License</a>
+      <a href="#free">Free Forever</a>
       <a href="#howto">Guide</a>
       <a href="#download" class="btn btn-primary btn-sm">📥 Download</a>
     </div>
@@ -24,18 +24,21 @@
 <section class="container">
   <div class="hero">
     <div class="hero-content">
+      <div class="eyebrow"><span class="eyebrow-dot"></span>Free browser automation assistant</div>
       <h1>Indian Visa <br /><span class="highlight">Automator</span></h1>
-      <p>One‑click automation for visa form filling, OTP verification, PDF uploads, and slot booking. Enter your license key once — automate forever.</p>
+      <p>Complete repetitive visa-application browser tasks faster from home. Assisted automation for login, OTP verification, PDF uploads, and appointment slot selection.</p>
       <div class="hero-actions">
         <a href="#download" class="btn btn-primary">🚀 Get Started</a>
         <a href="#howto" class="btn btn-outline">How it works</a>
       </div>
+      <p class="hero-note">No license key. No admin secret. Free for everyone.</p>
     </div>
     <div class="hero-visual">
-      <div class="hero-card">
-        <div class="label">📋 Your License</div>
-        <div class="value" id="licenseDisplay">— <small>inactive</small></div>
-        <div><span class="status-badge inactive" id="statusBadge">⚪ Missing</span></div>
+      <div class="hero-card free-card">
+        <div class="card-kicker">⚡ IndianVisaBuzz</div>
+        <div class="free-title">Free Forever</div>
+        <p class="free-copy">Start using the extension without activation or registration.</p>
+        <div class="free-status"><span class="status-check">✓</span><span>Ready to use</span></div>
         <div class="feature-grid">
           <div class="item"><span class="dot"></span> Auto Login</div>
           <div class="item"><span class="dot"></span> OTP Verify</div>
@@ -50,23 +53,23 @@
 <section class="section" id="features">
   <div class="container">
     <h2 class="section-title">⚡ Key <span class="text-gradient">Features</span></h2>
-    <p class="section-sub">Four powerful automation tools designed to save your time</p>
+    <p class="section-sub">Four assisted automation tools designed to save time during repetitive browser steps.</p>
     <div class="features">
-      <div class="feature-card"><div class="icon">🚀</div><h3>Auto Login</h3><p>Fill phone &amp; password with one click. Captcha ready.</p></div>
-      <div class="feature-card"><div class="icon">📱</div><h3>OTP Verification</h3><p>Automatically inputs and verifies 6‑digit OTP. Split or single field.</p></div>
-      <div class="feature-card"><div class="icon">📎</div><h3>PDF Upload</h3><p>Upload multiple PDFs (primary + up to 3 extra) via drag‑and‑drop.</p></div>
-      <div class="feature-card"><div class="icon">📅</div><h3>Slot Booking</h3><p>Picks your date, navigates the calendar, and books automatically.</p></div>
+      <div class="feature-card"><div class="icon">🚀</div><h3>Auto Login</h3><p>Fill phone and password with one click. Complete CAPTCHA manually when prompted.</p></div>
+      <div class="feature-card"><div class="icon">📱</div><h3>OTP Verification</h3><p>Enter a six-digit OTP into single or split OTP fields on the portal.</p></div>
+      <div class="feature-card"><div class="icon">📎</div><h3>PDF Upload</h3><p>Upload one primary PDF and up to three extra files, up to 500 KB each.</p></div>
+      <div class="feature-card"><div class="icon">📅</div><h3>Slot Booking</h3><p>Find and select an available appointment date in the portal calendar.</p></div>
     </div>
   </div>
 </section>
 
-<section class="section" id="license">
+<section class="section" id="free">
   <div class="container">
     <h2 class="section-title">✅ <span class="text-gradient">Free Forever</span></h2>
-    <p class="section-sub">IndianVisaBuzz is free for everyone. No license key is required.</p>
-    <div class="license-panel" style="text-align:center;">
-      <div style="font-size:18px;font-weight:700;color:var(--text-primary);">Use the extension without activation</div>
-      <p style="color:var(--text-secondary);margin:12px 0 0;">Download the Chrome Extension, load it in Developer mode, open the supported visa portal, and start the four automation steps.</p>
+    <p class="section-sub">There is no license activation or admin setup in the current version.</p>
+    <div class="free-panel">
+      <div class="free-panel-icon">✓</div>
+      <div><strong>Ready to use</strong><p>Download the Chrome Extension, load it in Developer mode, open a supported visa portal, and start the four automation steps.</p></div>
     </div>
   </div>
 </section>
@@ -74,42 +77,34 @@
 <section class="section" id="howto">
   <div class="container">
     <h2 class="section-title">📖 How to <span class="text-gradient">Use</span></h2>
-    <p class="section-sub">Start your automation in 4 steps</p>
+    <p class="section-sub">Start in four simple steps.</p>
     <div class="steps">
-      <div class="step-item"><div class="step-icon">✅</div><h4>Free to Use</h4><p>No license key or activation is required.</p></div>
-      <div class="step-item"><div class="step-icon">🧩</div><h4>Install Extension</h4><p>Download and load the Chrome extension (link below).</p></div>
-      <div class="step-item"><div class="step-icon">🌐</div><h4>Go to Visa Site</h4><p>Log in to the Indian visa portal, then open the widget.</p></div>
-      <div class="step-item"><div class="step-icon">⚡</div><h4>Run Automation</h4><p>Click 1→2→3→4 — every step runs automatically.</p></div>
+      <div class="step-item"><div class="step-icon">🧩</div><h4>Install Extension</h4><p>Download the ZIP and load the extension folder in Chrome Developer mode.</p></div>
+      <div class="step-item"><div class="step-icon">🌐</div><h4>Open Visa Portal</h4><p>Open the supported portal and prepare your account, OTP and documents.</p></div>
+      <div class="step-item"><div class="step-icon">📝</div><h4>Prepare Details</h4><p>Enter phone, password, OTP, appointment date and PDF files in the widget.</p></div>
+      <div class="step-item"><div class="step-icon">⚡</div><h4>Run Automation</h4><p>Click Auto Login, Verify OTP, Upload File and Slot Booking in order.</p></div>
     </div>
   </div>
 </section>
 
 <section class="section" id="download">
-  <div class="container" style="text-align:center;">
-    <h2 class="section-title">📥 Extension <span class="text-gradient">Download</span></h2>
-    <p class="section-sub">Install the extension and start automating</p>
-    <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:16px;margin-top:10px;">
-      <a href="/indianvisabuzz-extension.zip" class="btn btn-primary" style="font-size:16px;padding:14px 36px;">⬇ Download Extension</a>
-      <a href="https://github.com/HumayunShariarHimu/IndianVisaBuzz" class="btn btn-outline" style="font-size:16px;padding:14px 36px;">📦 Source Code</a>
+  <div class="container download-section">
+    <h2 class="section-title">📥 Get the <span class="text-gradient">Extension</span></h2>
+    <p class="section-sub">Free forever. No license key is required.</p>
+    <div class="download-actions">
+      <a href="/indianvisabuzz-extension.zip" class="btn btn-primary download-btn">⬇ Download Extension</a>
+      <a href="https://github.com/HumayunShariarHimu/IndianVisaBuzz" class="btn btn-outline download-btn">📦 View Source Code</a>
     </div>
+    <p class="download-note">Chrome desktop is required for loading an unpacked extension.</p>
   </div>
 </section>
 
 <footer class="footer">
   <div class="container">
-    <div class="footer-links">
-      <a href="#">Telegram</a><a href="#">Admin</a><a href="#">Guide</a><a href="#">Privacy</a>
-    </div>
-    <div>
-      <span class="brand">Indian<span>VisaBuzz</span></span> · Visa Automation Suite
-      <div class="credit">Developed by Humayun Shariar Himu</div>
-      <div style="margin-top:4px;font-size:12px;color:var(--text-muted);">&copy; <span id="year"></span> · For automation only · No API/server scraping</div>
-    </div>
+    <div class="footer-links"><a href="#features">Features</a><a href="#howto">Guide</a><a href="https://github.com/HumayunShariarHimu/IndianVisaBuzz">GitHub</a><a href="/admin.html">Free Version</a></div>
+    <div><span class="brand">Indian<span>VisaBuzz</span></span> · Free Indian Visa Automation Assistant<div class="credit">Developed by Humayun Shariar Himu</div><div class="footer-disclaimer">© <span id="year"></span> · For assisted automation only · No API/server scraping</div></div>
   </div>
 </footer>
-
-<script>
-  document.getElementById('year').textContent = new Date().getFullYear();
-</script>
+<script>document.getElementById('year').textContent = new Date().getFullYear();</script>
 </body>
 </html>
