@@ -140,13 +140,7 @@
         <span class="close-btn" id="visa-qa-close">&times;</span>
       </div>
       <div id="visa-qa-body">
-        <div class="field">
-          <label class="visa-qa-label">License Key <span class="req" id="visa-lic-badge"></span></label>
-          <div class="pass-wrap">
-            <input class="visa-qa-input" id="visa-in-license" type="text" placeholder="IVB-XXXXXXXXXXXX-XXXXXXXX" autocomplete="off" />
-            <button class="eye" id="visa-lic-activate" type="button" title="Activate">✓</button>
-          </div>
-        </div>
+        <div class="license-free-note">Free forever — no license key required.</div>
         <div class="row">
           <div class="field">
             <label class="visa-qa-label">Phone</label>
@@ -195,11 +189,6 @@
       if (c.password) $('visa-in-pass').value = c.password;
       if (c.date) $('visa-in-date').value = c.date;
     });
-    loadLicense(lic => {
-      if (lic.key) $('visa-in-license').value = lic.key;
-      if (lic.valid) updateBadge(lic);
-    });
-
     renderPdfList();
     $('visa-in-pdf').addEventListener('change', onPdfPicked);
 
@@ -218,12 +207,10 @@
       const p = $('visa-in-pass'); p.type = p.type === 'password' ? 'text' : 'password';
     });
     $('visa-qa-close').addEventListener('click', toggleWidget);
-    $('visa-lic-activate').addEventListener('click', () => ensureLicensed(() => setStatus('License active ✓', 'success')));
-
-    $('btn-step1').addEventListener('click', () => ensureLicensed(runLogin));
-    $('btn-step2').addEventListener('click', () => ensureLicensed(runOTP));
-    $('btn-step3').addEventListener('click', () => ensureLicensed(runUploadConfirm));
-    $('btn-step4').addEventListener('click', () => ensureLicensed(runSlotBooking));
+    $('btn-step1').addEventListener('click', runLogin);
+    $('btn-step2').addEventListener('click', runOTP);
+    $('btn-step3').addEventListener('click', runUploadConfirm);
+    $('btn-step4').addEventListener('click', runSlotBooking);
 
     LOG('Widget ready.');
   }

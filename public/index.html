@@ -62,19 +62,11 @@
 
 <section class="section" id="license">
   <div class="container">
-    <h2 class="section-title">🔑 License <span class="text-gradient">Verification</span></h2>
-    <p class="section-sub">Enter your key and check status instantly</p>
-    <div class="license-panel">
-      <div style="font-size:13px;font-weight:600;color:var(--text-secondary);margin-bottom:4px;">Your License Key</div>
-      <div class="field-group">
-        <input type="text" id="licenseKeyInput" placeholder="IVB-XXXXXXXXXXXX-XXXXXXXX" autocomplete="off" />
-        <button class="btn btn-primary" id="verifyBtn">✔ Verify</button>
-      </div>
-      <div class="license-status" id="licenseStatus"></div>
-      <div style="margin-top:16px;border-top:1px solid var(--border-color);padding-top:14px;font-size:12px;color:var(--text-muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;">
-        <span>🆔 Device: <strong id="deviceIdDisplay">—</strong></span>
-        <span>📅 Last check: <strong id="lastCheckedDisplay">—</strong></span>
-      </div>
+    <h2 class="section-title">✅ <span class="text-gradient">Free Forever</span></h2>
+    <p class="section-sub">IndianVisaBuzz is free for everyone. No license key is required.</p>
+    <div class="license-panel" style="text-align:center;">
+      <div style="font-size:18px;font-weight:700;color:var(--text-primary);">Use the extension without activation</div>
+      <p style="color:var(--text-secondary);margin:12px 0 0;">Download the Chrome Extension, load it in Developer mode, open the supported visa portal, and start the four automation steps.</p>
     </div>
   </div>
 </section>
@@ -84,7 +76,7 @@
     <h2 class="section-title">📖 How to <span class="text-gradient">Use</span></h2>
     <p class="section-sub">Start your automation in 4 steps</p>
     <div class="steps">
-      <div class="step-item"><div class="step-icon">🔑</div><h4>Activate License</h4><p>Paste your license key above and click Verify.</p></div>
+      <div class="step-item"><div class="step-icon">✅</div><h4>Free to Use</h4><p>No license key or activation is required.</p></div>
       <div class="step-item"><div class="step-icon">🧩</div><h4>Install Extension</h4><p>Download and load the Chrome extension (link below).</p></div>
       <div class="step-item"><div class="step-icon">🌐</div><h4>Go to Visa Site</h4><p>Log in to the Indian visa portal, then open the widget.</p></div>
       <div class="step-item"><div class="step-icon">⚡</div><h4>Run Automation</h4><p>Click 1→2→3→4 — every step runs automatically.</p></div>
@@ -98,7 +90,7 @@
     <p class="section-sub">Install the extension and start automating</p>
     <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:16px;margin-top:10px;">
       <a href="/indianvisabuzz-extension.zip" class="btn btn-primary" style="font-size:16px;padding:14px 36px;">⬇ Download Extension</a>
-      <a href="https://github.com/" class="btn btn-outline" style="font-size:16px;padding:14px 36px;">📦 Source Code</a>
+      <a href="https://github.com/HumayunShariarHimu/IndianVisaBuzz" class="btn btn-outline" style="font-size:16px;padding:14px 36px;">📦 Source Code</a>
     </div>
   </div>
 </section>
@@ -117,78 +109,7 @@
 </footer>
 
 <script>
-(function () {
-  const $ = (id) => document.getElementById(id);
-  const keyInput = $('licenseKeyInput'), verifyBtn = $('verifyBtn'),
-        statusEl = $('licenseStatus'), badgeEl = $('statusBadge'),
-        displayEl = $('licenseDisplay'), deviceIdEl = $('deviceIdDisplay'),
-        lastCheckedEl = $('lastCheckedDisplay');
-  const STORAGE_KEY = 'visaBuzzLicense', DEVICE_KEY = 'visaBuzzDeviceId';
-
-  $('year').textContent = new Date().getFullYear();
-
-  function getDeviceId() {
-    try {
-      let id = localStorage.getItem(DEVICE_KEY);
-      if (!id) { id = 'dev-' + Math.random().toString(36).slice(2,10) + Date.now().toString(36); localStorage.setItem(DEVICE_KEY, id); }
-      return id;
-    } catch (_) { return 'dev-fallback-' + Date.now(); }
-  }
-  function setStatus(msg, type) { statusEl.textContent = msg; statusEl.className = 'license-status visible ' + (type||'info'); }
-  function updateUI(lic) {
-    if (lic && lic.valid) {
-      const exp = lic.expiresAt ? new Date(lic.expiresAt).toLocaleDateString() : 'never';
-      displayEl.innerHTML = lic.plan + ' <small>✓ active</small>';
-      badgeEl.className = 'status-badge';
-      badgeEl.innerHTML = '🟢 Active · ' + lic.plan;
-      setStatus('✅ License active! (expires: ' + exp + ')', 'success');
-    } else if (lic && lic.key) {
-      displayEl.innerHTML = '— <small>invalid</small>';
-      badgeEl.className = 'status-badge inactive';
-      badgeEl.innerHTML = '🔴 Invalid';
-      const map = { expired:'License expired.', invalid_key:'Invalid key.', malformed:'Malformed key.', network_error:'Network error.' };
-      setStatus('❌ ' + (map[lic.reason] || 'Verification failed.'), 'error');
-    } else {
-      displayEl.innerHTML = '— <small>inactive</small>';
-      badgeEl.className = 'status-badge inactive';
-      badgeEl.innerHTML = '⚪ Missing';
-      setStatus('🔑 Enter a license key and click Verify.', 'info');
-    }
-  }
-  function loadLicense() {
-    try { const raw = localStorage.getItem(STORAGE_KEY); if (raw) { const d = JSON.parse(raw); if (d.key) keyInput.value = d.key; if (d.checkedAt) lastCheckedEl.textContent = new Date(d.checkedAt).toLocaleString(); updateUI(d); return d; } } catch(_) {}
-    updateUI(null); return null;
-  }
-  function saveLicense(d) { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(d)); if (d.checkedAt) lastCheckedEl.textContent = new Date(d.checkedAt).toLocaleString(); updateUI(d); } catch(_) {} }
-
-  function verifyLicense(key) {
-    const deviceId = getDeviceId(); deviceIdEl.textContent = deviceId;
-    setStatus('⏳ Verifying…', 'info');
-    verifyBtn.disabled = true; verifyBtn.innerHTML = 'Verifying…';
-    fetch('/api/verify', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ key, deviceId }) })
-      .then(r => r.json())
-      .then(d => {
-        if (d && d.valid) saveLicense({ key, valid:true, plan:d.plan, expiresAt:d.expiresAt, checkedAt:Date.now() });
-        else              saveLicense({ key, valid:false, reason:d.reason||'invalid_key', checkedAt:Date.now() });
-      })
-      .catch(() => { setStatus('🌐 Network error.', 'error'); saveLicense({ key, valid:false, reason:'network_error', checkedAt:Date.now() }); })
-      .finally(() => { verifyBtn.disabled = false; verifyBtn.innerHTML = '✔ Verify'; });
-  }
-
-  verifyBtn.addEventListener('click', () => {
-    const k = keyInput.value.trim();
-    if (!k) { setStatus('⚠️ Enter a license key.', 'error'); return; }
-    verifyLicense(k);
-  });
-  keyInput.addEventListener('keydown', e => { if (e.key === 'Enter') verifyBtn.click(); });
-
-  deviceIdEl.textContent = getDeviceId();
-  const stored = loadLicense();
-  if (stored && stored.key && stored.valid) {
-    const now = Date.now();
-    if (!stored.checkedAt || (now - stored.checkedAt) > 6*3600*1000) verifyLicense(stored.key);
-  }
-})();
+  document.getElementById('year').textContent = new Date().getFullYear();
 </script>
 </body>
 </html>
