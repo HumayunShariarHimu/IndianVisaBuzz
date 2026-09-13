@@ -9,21 +9,11 @@
   const MAX_PDFS      = 4;
   const MAX_PDF_BYTES = 500 * 1024;
   const STORE_KEY     = 'visaBuzzCreds';
-  const LIC_STORE     = 'visaBuzzLicense';
-  const DEVICE_KEY    = 'visaBuzzDeviceId';
-  const LIC_RECHECK   = 6 * 60 * 60 * 1000;
 
   let selectedPdfs = [];
   let isDragging = false, startX = 0, startY = 0, startLeft = 0, startTop = 0;
 
   // ───────── helpers ─────────
-  function getDeviceId() {
-    try {
-      let id = localStorage.getItem(DEVICE_KEY);
-      if (!id) { id = 'dev-' + Math.random().toString(36).slice(2,10) + Date.now().toString(36); localStorage.setItem(DEVICE_KEY, id); }
-      return id;
-    } catch (_) { return 'dev-fallback-' + Date.now(); }
-  }
   function $(id) { return document.getElementById(id); }
   function val(id) { return ($(id) || {}).value || ''; }
   function resolveEl(sel) { return typeof sel === 'function' ? sel() : document.querySelector(sel); }
@@ -69,58 +59,6 @@
   }
   function getCreds() { return { phone: val('visa-in-phone'), password: val('visa-in-pass'), date: val('visa-in-date') }; }
 
-  // ───────── license ─────────
-  function loadLicense(cb) { try { chrome.storage.local.get(LIC_STORE, r => cb((r && r[LIC_STORE]) || {})); } catch (_) { cb({}); } }
-  function saveLicense(d)   { try { chrome.storage.local.set({ [LIC_STORE]: d }); } catch (_) {} }
-  function verifyWithServer(key, cb) {
-    try {
-      chrome.runtime.sendMessage({ action: 'verify_license', key, deviceId: getDeviceId() }, res => {
-        if (chrome.runtime.lastError || !res) return cb({ valid: false, reason: 'network_error' });
-        cb(res);
-      });
-    } catch (_) { cb({ valid: false, reason: 'network_error' }); }
-  }
-  function humanReason(r) {
-    return {
-      missing_key: 'Enter your license key.',
-      invalid_key: 'Invalid license key.',
-      malformed:   'Malformed license key.',
-      expired:     'License expired. Please renew.',
-      network_error: 'No internet / server unreachable.',
-    }[r] || 'License check failed.';
-  }
-  function ensureLicensed(cb) {
-    const inputKey = ($('visa-in-license') || {}).value.trim();
-    loadLicense(lic => {
-      const now = Date.now();
-      const key = inputKey || lic.key || '';
-      if (lic.valid && lic.key === key && lic.checkedAt && (now - lic.checkedAt) < LIC_RECHECK) return cb();
-      if (!key) return setStatus(humanReason('missing_key'), 'error');
-      setStatus('Checking license…', 'info');
-      verifyWithServer(key, res => {
-        if (res && res.valid) {
-          saveLicense({ key, valid: true, plan: res.plan, expiresAt: res.expiresAt, checkedAt: now });
-          updateBadge(res);
-          cb();
-        } else {
-          saveLicense({ key, valid: false, reason: res.reason, checkedAt: now });
-          updateBadge(res || {});
-          setStatus(humanReason(res && res.reason), 'error');
-        }
-      });
-    });
-  }
-  function updateBadge(lic) {
-    const el = $('visa-lic-badge'); if (!el) return;
-    if (lic && lic.valid) {
-      if (lic.expiresAt) {
-        const d = Math.max(0, Math.round((lic.expiresAt - Date.now()) / 86400000));
-        el.textContent = `(${lic.plan} — ${d}d left)`;
-      } else el.textContent = `(${lic.plan} — lifetime)`;
-    } else if (lic && lic.reason) {
-      el.textContent = '(' + String(lic.reason).replace(/_/g, ' ') + ')';
-    }
-  }
 
   // ───────── widget UI ─────────
   function toggleWidget() {
