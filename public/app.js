@@ -2,29 +2,155 @@
   'use strict';
 
   const PROFILE_KEY = 'ivb.profile.v2';
+  const LANGUAGE_KEY = 'ivb.language.v1';
+  const catalog = window.IVB_I18N;
+  if (!catalog) throw new Error('IndianVisaBuzz language catalog did not load.');
+
   const navButtons = [...document.querySelectorAll('[data-view]')];
   const pages = [...document.querySelectorAll('[data-page]')];
   const pageLabel = document.getElementById('page-label');
+  const languageButtons = [...document.querySelectorAll('[data-language]')];
   const labels = {
-    overview: 'সংক্ষিপ্ত বিবরণ',
-    profile: 'আবেদনকারীর তথ্য',
-    documents: 'ডকুমেন্ট প্রস্তুতি',
-    'slot-buddy': 'Slot Buddy',
-    extension: 'ব্রাউজার সহায়ক'
+    overview: 'pageOverview',
+    profile: 'pageProfile',
+    documents: 'pageDocuments',
+    'slot-buddy': 'pageSlot',
+    extension: 'pageExtension'
   };
+  let language = getLanguage();
+  let activePage = 'overview';
   let selectedFiles = [];
   let toastTimer;
+  const liveMessages = new Map();
+  const textSnapshots = captureTextNodes();
+  const attributeSnapshots = captureAttributes();
 
-  function showToast(message) {
-    const toast = document.getElementById('toast');
-    toast.textContent = message;
-    toast.classList.add('show');
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => toast.classList.remove('show'), 2800);
+  function getLanguage() {
+    try {
+      const saved = localStorage.getItem(LANGUAGE_KEY);
+      return saved === 'en' || saved === 'bn' ? saved : catalog.defaultLanguage;
+    } catch (_) {
+      return catalog.defaultLanguage;
+    }
+  }
+
+  function normalize(value) {
+    return String(value).replace(/\s+/g, ' ').trim();
+  }
+
+  function captureTextNodes() {
+    const snapshots = [];
+    const walker = document.createTreeWalker(document.documentElement, NodeFilter.SHOW_TEXT);
+    let node;
+    while ((node = walker.nextNode())) {
+      if (!node.parentElement || node.parentElement.closest('script,style')) continue;
+      const source = node.nodeValue;
+      if (normalize(source)) snapshots.push({ node, source });
+    }
+    return snapshots;
+  }
+
+  function captureAttributes() {
+    const snapshots = [];
+    const attributes = ['aria-label', 'aria-description', 'placeholder', 'title', 'alt'];
+    document.querySelectorAll('*').forEach(element => {
+      attributes.forEach(attribute => {
+        if (element.hasAttribute(attribute)) {
+          snapshots.push({ element, attribute, source: element.getAttribute(attribute) });
+        }
+      });
+    });
+    return snapshots;
+  }
+
+  function translateStatic(languageCode) {
+    textSnapshots.forEach(({ node, source }) => {
+      if (!node.isConnected) return;
+      const phrase = normalize(source);
+      const translated = catalog.copy[phrase]?.[languageCode] || phrase;
+      const leading = source.match(/^\s*/)?.[0] || '';
+      const trailing = source.match(/\s*$/)?.[0] || '';
+      node.nodeValue = `${leading}${translated}${trailing}`;
+    });
+    attributeSnapshots.forEach(({ element, attribute, source }) => {
+      if (!element.isConnected) return;
+      const phrase = normalize(source);
+      const translated = catalog.attributes[phrase]?.[languageCode]
+        || catalog.copy[phrase]?.[languageCode]
+        || phrase;
+      element.setAttribute(attribute, translated);
+    });
+  }
+
+  function format(message, params = {}) {
+    if (typeof message === 'function') return message(params);
+    return String(message || '').replace(/\{(\w+)\}/g, (_, key) => String(params[key] ?? ''));
+  }
+
+  function t(key, params = {}, languageCode = language) {
+    const messages = catalog.messages[languageCode];
+    if (key === 'pdfErrors') {
+      const errors = params.errors || [];
+      const first = errors[0];
+      if (!first) return '';
+      const firstText = format(messages[first.key], first.params);
+      if (errors.length === 1) return firstText;
+      const more = format(messages.extraIssues, { count: errors.length - 1 });
+      return `${firstText} (${more})`;
+    }
+    return format(messages[key], params);
+  }
+
+  function setMessage(element, key, params = {}) {
+    if (!element) return;
+    liveMessages.set(element, { key, params });
+    element.textContent = t(key, params);
+  }
+
+  function refreshLiveMessages() {
+    for (const [element, message] of liveMessages) {
+      if (!element.isConnected) {
+        liveMessages.delete(element);
+        continue;
+      }
+      element.textContent = t(message.key, message.params);
+    }
+  }
+
+  function applyLanguage() {
+    document.documentElement.lang = language;
+    translateStatic(language);
+    refreshLiveMessages();
+    languageButtons.forEach(button => {
+      const active = button.dataset.language === language;
+      button.classList.toggle('active', active);
+      button.setAttribute('aria-pressed', String(active));
+    });
+    const languageGroup = document.querySelector('.language-toggle');
+    if (languageGroup) languageGroup.setAttribute('aria-label', language === 'bn' ? 'ভাষা নির্বাচন' : 'Choose language');
+    const description = document.querySelector('meta[name="description"]');
+    if (description) {
+      description.content = language === 'bn'
+        ? 'IndianVisaBuzz — ভারতীয় ভিসা আবেদন প্রস্তুতি, নথির তালিকা এবং সরকারি সূত্র এক জায়গায়।'
+        : 'IndianVisaBuzz — prepare an Indian visa application with a document checklist and official sources.';
+    }
+    if (pageLabel) pageLabel.textContent = t(labels[activePage]);
+    document.title = `${t(labels[activePage])} · IndianVisaBuzz`;
+  }
+
+  function setLanguage(nextLanguage) {
+    if (nextLanguage !== 'bn' && nextLanguage !== 'en') return;
+    if (language === nextLanguage) return;
+    language = nextLanguage;
+    try { localStorage.setItem(LANGUAGE_KEY, language); } catch (_) { /* Language still changes for this session. */ }
+    applyLanguage();
+    updateOverview();
+    renderFiles();
   }
 
   function navigate(name) {
     if (!labels[name]) return;
+    activePage = name;
     pages.forEach(page => {
       const active = page.dataset.page === name;
       page.classList.toggle('active', active);
@@ -36,13 +162,14 @@
       if (active) button.setAttribute('aria-current', 'page');
       else button.removeAttribute('aria-current');
     });
-    pageLabel.textContent = labels[name];
-    document.title = `${labels[name]} · IndianVisaBuzz`;
+    pageLabel.textContent = t(labels[name]);
+    document.title = `${t(labels[name])} · IndianVisaBuzz`;
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   navButtons.forEach(button => button.addEventListener('click', () => navigate(button.dataset.view)));
   document.querySelectorAll('[data-go]').forEach(button => button.addEventListener('click', () => navigate(button.dataset.go)));
+  languageButtons.forEach(button => button.addEventListener('click', () => setLanguage(button.dataset.language)));
 
   const form = document.getElementById('profile-form');
   const remember = document.getElementById('remember-profile');
@@ -62,21 +189,16 @@
   }
 
   function updateOverview() {
-    const data = getFormData();
-    const progress = countProfile(data);
+    const progress = countProfile(getFormData());
     const profilePercent = Math.round((progress.completed / progress.total) * 100);
     document.getElementById('profile-progress').textContent = `${profilePercent}%`;
     document.getElementById('profile-progress-bar').style.width = `${profilePercent}%`;
-    document.getElementById('profile-summary').textContent = progress.required === 4
-      ? 'আবশ্যক তথ্য পূরণ হয়েছে — portal-এ মিলিয়ে নিন'
-      : `${progress.required} / 4টি আবশ্যক তথ্য পূরণ হয়েছে`;
+    setMessage(document.getElementById('profile-summary'), progress.required === 4 ? 'profileReady' : 'profileMissing', { count: progress.required });
 
     const docCount = selectedFiles.length;
     document.getElementById('document-progress').textContent = `${docCount} / 4`;
     document.getElementById('document-progress-bar').style.width = `${docCount * 25}%`;
-    document.getElementById('document-summary').textContent = docCount
-      ? `${docCount}টি PDF এই tab-এ নির্বাচন করা হয়েছে`
-      : 'PDF নির্বাচন করা হয়নি';
+    setMessage(document.getElementById('document-summary'), docCount ? 'documentsSelected' : 'noPdfSelected', { count: docCount });
   }
 
   function loadRememberedProfile() {
@@ -87,7 +209,7 @@
         if (typeof saved[name] === 'string' && form.elements[name]) form.elements[name].value = saved[name];
       });
       remember.checked = true;
-      profileStatus.textContent = 'এই browser-এ সংরক্ষিত profile লোড হয়েছে।';
+      setMessage(profileStatus, 'profileLoaded');
     } catch (error) {
       try { localStorage.removeItem(PROFILE_KEY); } catch (_) { /* Storage may be disabled. */ }
     }
@@ -97,23 +219,31 @@
     try {
       if (!remember.checked) {
         localStorage.removeItem(PROFILE_KEY);
-        profileStatus.textContent = 'প্রোফাইল কেবল এই tab-এ আছে; browser বন্ধ হলে সংরক্ষিত থাকবে না।';
+        setMessage(profileStatus, 'profileSessionOnly');
         return;
       }
       localStorage.setItem(PROFILE_KEY, JSON.stringify(getFormData()));
-      profileStatus.textContent = 'প্রোফাইল এই browser-এর local storage-এ সংরক্ষিত হয়েছে; IndianVisaBuzz server-এ পাঠানো হয়নি।';
+      setMessage(profileStatus, 'profileSaved');
     } catch (_) {
-      profileStatus.textContent = 'Browser storage বন্ধ থাকায় প্রোফাইল সংরক্ষণ করা যায়নি; তথ্য এই tab-এ আছে।';
+      setMessage(profileStatus, 'storageUnavailable');
     }
+  }
+
+  function showToast(key, params = {}) {
+    const toast = document.getElementById('toast');
+    setMessage(toast, key, params);
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('show'), 2800);
   }
 
   form.addEventListener('submit', event => {
     event.preventDefault();
     if (!form.reportValidity()) return;
     if (remember.checked) persistProfile();
-    else profileStatus.textContent = 'তথ্য এই tab-এ প্রস্তুত আছে। স্থায়ীভাবে রাখতে checkbox নির্বাচন করুন।';
+    else setMessage(profileStatus, 'profilePrepared');
     updateOverview();
-    showToast(remember.checked ? 'প্রোফাইল এই device-এ সংরক্ষিত হয়েছে।' : 'তথ্য এই tab-এ প্রস্তুত।');
+    showToast(remember.checked ? 'profileSavedToast' : 'profilePreparedToast');
   });
   form.addEventListener('input', () => {
     if (remember.checked) persistProfile();
@@ -127,7 +257,7 @@
     if (remember.checked) persistProfile();
     else {
       try { localStorage.removeItem(PROFILE_KEY); } catch (_) { /* Storage may be disabled. */ }
-      profileStatus.textContent = 'এই browser থেকে সংরক্ষিত profile মুছে ফেলা হয়েছে।';
+      setMessage(profileStatus, 'profileRemoved');
     }
   });
 
@@ -162,7 +292,7 @@
     if (!selectedFiles.length) {
       const empty = document.createElement('li');
       empty.className = 'empty-files';
-      empty.textContent = 'এখনও কোনো ফাইল নির্বাচন করা হয়নি।';
+      empty.textContent = t('emptyFiles');
       list.append(empty);
     } else {
       selectedFiles.forEach((file, index) => {
@@ -176,13 +306,13 @@
         const name = document.createElement('strong');
         name.textContent = file.name;
         const size = document.createElement('small');
-        size.textContent = `${formatBytes(file.size)} · ${index === 0 ? 'প্রধান নথি' : `অতিরিক্ত ${index}`}`;
+        size.textContent = `${formatBytes(file.size)} · ${index === 0 ? t('primaryFile') : t('extraFile', { index })}`;
         meta.append(name, size);
         const remove = document.createElement('button');
         remove.className = 'remove-file';
         remove.type = 'button';
         remove.textContent = '×';
-        remove.setAttribute('aria-label', `${file.name} সরান`);
+        remove.setAttribute('aria-label', t('removeFile', { file: file.name }));
         remove.addEventListener('click', () => {
           selectedFiles.splice(index, 1);
           renderFiles();
@@ -201,29 +331,28 @@
     const incoming = [...(control.files || [])];
     control.value = '';
     control.disabled = true;
-    documentStatus.textContent = 'PDF file-এর content যাচাই করা হচ্ছে…';
+    setMessage(documentStatus, 'checkingPdf');
     const errors = [];
     try {
-    for (const file of incoming) {
-      if (!await isPdf(file)) {
-        errors.push(`${file.name}: বৈধ PDF content পাওয়া যায়নি`);
-        continue;
+      for (const file of incoming) {
+        if (!await isPdf(file)) {
+          errors.push({ key: 'invalidPdf', params: { file: file.name } });
+          continue;
+        }
+        if (file.size > MAX_BYTES) {
+          errors.push({ key: 'tooLarge', params: { file: file.name } });
+          continue;
+        }
+        if (selectedFiles.some(current => current.name.toLowerCase() === file.name.toLowerCase())) continue;
+        if (selectedFiles.length >= MAX_FILES) {
+          errors.push({ key: 'maxFiles', params: {} });
+          continue;
+        }
+        selectedFiles.push(file);
       }
-      if (file.size > MAX_BYTES) {
-        errors.push(`${file.name}: 500 KB-এর বেশি`);
-        continue;
-      }
-      if (selectedFiles.some(current => current.name.toLowerCase() === file.name.toLowerCase())) continue;
-      if (selectedFiles.length >= MAX_FILES) {
-        errors.push('সর্বোচ্চ ৪টি ফাইল নির্বাচন করা যাবে');
-        continue;
-      }
-      selectedFiles.push(file);
-    }
-    documentStatus.textContent = errors.length
-      ? `${errors[0]}${errors.length > 1 ? ` (+${errors.length - 1}টি সমস্যা)` : ''}`
-      : 'PDF content ঠিক আছে। নির্বাচিত PDF কেবল এই tab-এ থাকে; IndianVisaBuzz server-এ পাঠানো হয় না।';
-    renderFiles();
+      if (errors.length) setMessage(documentStatus, 'pdfErrors', { errors });
+      else setMessage(documentStatus, 'pdfReady');
+      renderFiles();
     } finally {
       control.disabled = false;
     }
@@ -231,10 +360,11 @@
 
   clearButton.addEventListener('click', () => {
     selectedFiles = [];
-    documentStatus.textContent = 'নির্বাচিত file list মুছে ফেলা হয়েছে।';
+    setMessage(documentStatus, 'filesCleared');
     renderFiles();
   });
 
+  applyLanguage();
   loadRememberedProfile();
   renderFiles();
 })();

@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "IndianVisaBuzz — Visa Preparation Assistant",
-  "version": "2.0.2",
+  "version": "2.1.0",
   "description": "Helps prepare applicant form fields and attach PDF files on official visa portals. You review and submit every step.",
   "permissions": ["activeTab", "storage"],
   "host_permissions": [

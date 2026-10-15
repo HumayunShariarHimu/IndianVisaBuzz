@@ -1,18 +1,30 @@
-# IndianVisaBuzz implementation plan
+# IndianVisaBuzz — bilingual dark-neon implementation
 
-The updated repository is a Bengali-first, source-backed visa-preparation workspace. It includes a local applicant profile, progress and document checklist, official-source Slot Buddy directory, and a Manifest V3 extension that attaches up to four verified PDF files to semantically identified official-portal document inputs.
+## Scope
 
-The extension is restricted to the exact official hosts `appointment.ivacbd.com` and `indianvisaonline.gov.in`. It does not automate passwords, OTPs, CAPTCHA, consent, payments, final submission, or appointment booking. It stops and explains when it cannot safely map the selected PDFs to enough document fields.
+Preserve the verified applicant-preparation workspace, official-source Slot Buddy, document checklist, safe multi-PDF attachment, Chrome extension, and existing Vercel delivery model. Provide the complete interface in Bengali or English, with Bengali as the default and each device/browser remembering the user’s choice. Use no AI badge or promotional AI text.
 
-The 15 October 2026 IVAC notice was checked for upload hours, appointment opening time, webfile age, matching applicant details, and upload replacement constraints. The IVAC anti-fraud advisory, the IVAC portal, HCI document list, and Government of India visa site are linked directly. These details can change; the official portal remains authoritative.
+## Localization architecture
 
-Implementation uses the existing Vercel-compatible static `public/` app with opt-in browser-local profile storage. It adds no database, account login, cloud file transfer, or third-party slot feed. The extension archive is reproducible with `npm run build:extension`. The legacy license API now requires configured secrets, uses a full HMAC-SHA256 signature and 96-bit nonce, rate-limits per IP within each serverless instance, and only enables CORS for an explicitly configured `APP_ORIGIN`.
+- `public/i18n.js`: one source of truth for static copy, attributes, accessibility labels and dynamic message catalogs in Bengali and English.
+- `public/app.js`: persists the website language preference, updates `lang`, title/description, navigation, form placeholders, live validation, summary cards, file rows, status and toast messages without clearing profile fields or selected PDFs.
+- `extension/content.js`: uses a matched Bengali/English catalog for the extension panel, validation, attachment guidance, accessibility labels and operational statuses; saves the extension’s language preference in `chrome.storage.local`.
+- Visa type and centre option `value`s remain stable in both languages so changing display copy cannot alter portal autofill values.
+- Product names, official organization names, standard acronyms, official Chrome menu labels and file formats can remain in their canonical form. Applicant-facing sentences otherwise remain in the selected language.
 
-## Main files
+## Dark-neon system
 
-- `public/index.html`, `public/style.css`, `public/app.js`: app shell, responsive interface, local state, document checks and Slot Buddy content.
-- `public/manus-routes.json`: single-page route declaration.
-- `extension/manifest.json`, `extension/content.js`, `extension/file-upload.js`, `extension/style.css`, `extension/background.js`: narrowly scoped extension, PDF signature validation, upload field identification and safe attach flow.
-- `scripts/build-extension.js`: creates the downloadable ZIP.
-- `lib/`, `api/`: fail-closed license key endpoints with improved signing and abuse protection.
-- `test/*.test.js`: upload, license and rate-limiter regression tests.
+Use a calm near-black/navy canvas and raised slate panels. Electric cyan/teal is reserved for primary actions, active navigation and focus; lime indicates success; violet and amber are secondary/warning accents. Glow is subtle and limited to active/focused states. Maintain strong text contrast, readable line-height, clear hierarchy, restrained border light, visible keyboard focus, reduced-motion support and mobile navigation/forms. Apply the same palette and interaction cues to the browser extension panel.
+
+## Existing safety and feature behavior
+
+- Browser-local profile storage remains opt-in; language preference is separate from visa profile data.
+- Up to four PDFs at no more than 500 KB each receive `%PDF-` signature validation.
+- Extension upload requires applicant-selected visible document fields, groups only on multi-file inputs, refuses ambiguous/populated fields, and never submits or books.
+- OTP/CAPTCHA, consent, payment, appointment selection and final submission remain applicant-controlled.
+- Slot Buddy links to official appointment/notice/advisory/document sources; it never claims live availability or guaranteed booking.
+- Keep exact HTTPS official-origin allowlisting, CSP/security headers and the fail-closed license API.
+
+## Verification and release
+
+Run syntax/JSON/style parsing, bilingual catalog coverage/quality checks, all prior PDF/origin/license/rate-limit tests, and extension packaging. Use the browser preview to verify both languages, navigation, profile/documents/Slot Buddy/extension pages and responsive layout. After a successful test run, push the commit directly to `main` as requested (no pull/PR merge), verify the Vercel production deployment is READY, and smoke-test its public alias and extension ZIP.

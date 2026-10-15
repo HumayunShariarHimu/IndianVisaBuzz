@@ -1,26 +1,25 @@
-# IndianVisaBuzz — implementation status
+# IndianVisaBuzz — completion checklist
 
-## PDF upload fix
-- [x] সর্বোচ্চ চারটি PDF, 500 KB/file এবং `%PDF-` signature যাচাই.
-- [x] প্রতিটি file-এর জন্য user-visible semantic portal destination বাছাই; hidden/unrelated slot বাদ.
-- [x] Multi-file field-এ group attach; পৃথক field-এ পৃথক file; populated input overwrite নয়.
-- [x] Count, target mapping, fake PDF, visibility, occupied-field ও metadata identity tests pass; automatic submit নেই.
+## English / বাংলা interface
+- [x] Bengali default, English toggle, and browser-local saved language preference.
+- [x] Overview, profile, document prep, Slot Buddy and extension guide copy/labels/accessibility strings are localized; title, metadata, dynamic summaries, validation, status and toasts follow the selected language.
+- [x] Switching language keeps profile fields and selected-file state; stable visa-type/centre values remain unchanged for autofill.
+- [x] Automated catalog coverage checks ensure complete translations and only approved product names, official acronyms and formats remain canonical in Bengali.
+- [x] Chrome extension UI supports both languages and persists the choice in extension-local storage.
 
-## Slot Buddy
-- [x] Official appointment, IVAC source/advisory, HCI document list ও Government of India visa links.
-- [x] ১৫ অক্টোবর ২০২৬-এর portal notice-এর schedule, webfile age/data match, upload edit ও failed-booking পরবর্তী notice source/date-সহ; পরিবর্তনশীল নিয়ম পুনরায় verify করতে সতর্কতা.
-- [x] Live slot availability, third-party booking বা guarantee দাবি নেই.
+## Dark-neon visual refresh
+- [x] All five website views, navigation, cards, forms, callouts, status and extension panel use a restrained near-black/navy and cyan/lime/amber palette.
+- [x] Checklist/privacy panels are dark-surface safe; text hierarchy, keyboard focus, reduced-motion and narrow-screen CSS rules are present.
+- [x] No AI badges or promotional AI copy.
 
-## App ও extension
-- [x] বাংলা-প্রথম responsive profile/progress/document checklist/Slot Buddy/extension guide.
-- [x] Opt-in local profile storage; website PDF IndianVisaBuzz server-এ যায় না; attach-এর পর portal নিজস্ব নিয়মে upload চালাতে পারে; account credentials সংগ্রহ হয় না.
-- [x] Chrome extension exact HTTPS official hosts-এ সীমিত; autofill, signature-check ও explicit portal-field mapping.
-- [x] Source থেকে generated ZIP integrity check pass.
+## Existing behavior preserved
+- [x] Up to four PDFs, 500 KB each, `%PDF-` signature validation and visible, user-selected portal destinations.
+- [x] Existing/populated targets are not overwritten; missing/ambiguous fields stop attachment; no automatic submission or booking.
+- [x] Slot Buddy keeps official portal/advisory/document links, current-notice disclaimer and fraud warning without claiming live slot access or guaranteed booking.
+- [x] Profile persistence remains opt-in; OTP/CAPTCHA, consent, payment, appointment selection and final submission stay with the applicant.
 
-## Quality & security
-- [x] Vercel CSP/security headers; license API default secret বাদ, full HMAC-SHA256, 96-bit nonce, exact-origin CORS, best-effort per-instance rate limit.
-- [x] ১৭ automated tests, JS syntax checks, JSON validation ও `git diff --check` pass.
-- [x] Preview browser-এ overview/profile/documents/Slot Buddy/extension guide পরীক্ষা.
-- [x] Public preview-তে চার synthetic valid PDF `4/4`; fake `.pdf` reject; document list clear করে test data মুছে ফেলা.
-
-**By design:** IVAC-এ CAPTCHA/OTP, payment, appointment selection ও final submit ব্যবহারকারী portal-এ নিজে করবেন।
+## Verification
+- [x] All 27 automated tests pass, including upload, localization, extension-origin, license and rate-limit coverage.
+- [x] JavaScript/JSON validation, `git diff --check` and extension ZIP integrity pass.
+- [x] Browser preview verified in Bengali and English across overview, profile, documents, Slot Buddy and extension guide; computed dark background and loaded style rules checked.
+- [x] Browser-only synthetic test accepted four valid PDF fixtures, preserved them across language switch, and rejected a fifth; fixtures were not sent to any portal.

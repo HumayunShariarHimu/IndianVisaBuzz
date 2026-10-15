@@ -29,7 +29,10 @@ test('generated license uses a full SHA-256 HMAC, strong nonce, and verifies', (
     const generated = generateKey('1');
     assert.equal(generated.key.split('-').at(-1).length, 64);
     assert.equal(verifyKey(generated.key).valid, true);
-    assert.equal(verifyKey(`${generated.key.slice(0, -1)}0`).valid, false);
+    const segments = generated.key.split('-');
+    const signature = segments.pop();
+    segments.push(`${signature[0] === 'A' ? 'B' : 'A'}${signature.slice(1)}`);
+    assert.equal(verifyKey(segments.join('-')).valid, false);
     assert.notEqual(generateKey('1').key, generated.key);
     assert.equal(checkAdmin(process.env.ADMIN_SECRET), true);
     assert.equal(checkAdmin('wrong-secret'), false);

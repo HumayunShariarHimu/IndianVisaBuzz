@@ -3,12 +3,12 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#f6f8f7">
+  <meta name="theme-color" content="#070b12">
   <meta name="description" content="IndianVisaBuzz — ভারতীয় ভিসা আবেদন প্রস্তুতি, ডকুমেন্ট চেকলিস্ট এবং অফিসিয়াল appointment source এক জায়গায়।">
   <title>IndianVisaBuzz — ভিসা প্রস্তুতি workspace</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/style.css"><script defer src="/app.js"></script>
+  <link rel="stylesheet" href="/style.css"><script defer src="/i18n.js"></script><script defer src="/app.js"></script>
 </head>
 <body>
   <div class="app-shell">
@@ -25,7 +25,7 @@
       <div class="sidebar-bottom"><div class="local-note"><span class="local-dot"></span><span><strong>আপনার ডিভাইসেই</strong><small>প্রোফাইলের তথ্য বাইরে পাঠানো হয় না</small></span></div><a class="side-link" href="https://appointment.ivacbd.com/" target="_blank" rel="noopener noreferrer">অফিসিয়াল appointment portal <span>↗</span></a></div>
     </aside>
     <main class="main-area">
-      <header class="topbar"><div class="breadcrumbs"><span>IndianVisaBuzz</span><span class="crumb-sep">/</span><strong id="page-label">সংক্ষিপ্ত বিবরণ</strong></div><div class="topbar-actions"><span class="source-pill"><span></span> অফিসিয়াল source-ভিত্তিক</span><a class="top-link" href="https://appointment.ivacbd.com/" target="_blank" rel="noopener noreferrer">IVAC portal ↗</a></div></header>
+      <header class="topbar"><div class="breadcrumbs"><span>IndianVisaBuzz</span><span class="crumb-sep">/</span><strong id="page-label">সংক্ষিপ্ত বিবরণ</strong></div><div class="topbar-actions"><div class="language-toggle" role="group" aria-label="Language"><button class="language-option active" type="button" data-language="bn" aria-pressed="true">বাংলা</button><button class="language-option" type="button" data-language="en" aria-pressed="false">English</button></div><span class="source-pill"><span></span> অফিসিয়াল source-ভিত্তিক</span><a class="top-link" href="https://appointment.ivacbd.com/" target="_blank" rel="noopener noreferrer">IVAC portal ↗</a></div></header>
       <div class="content-wrap">
         <section class="page-view active" data-page="overview" aria-labelledby="overview-title">
           <div class="welcome-row"><div><p class="eyebrow">আবেদন প্রস্তুতি</p><h1 id="overview-title">আপনার ভিসা প্রস্তুতি,<br><span>এক জায়গায়।</span></h1><p class="intro-copy">আবেদনকারীর তথ্য গুছিয়ে রাখুন, ডকুমেন্ট যাচাই করুন, তারপর অফিসিয়াল পোর্টালে নিজে এগিয়ে যান।</p></div><div class="welcome-actions"><button class="button button-primary" type="button" data-go="profile">তথ্য প্রস্তুত করুন <span>→</span></button><button class="button button-secondary" type="button" data-go="slot-buddy">Slot Buddy দেখুন</button></div></div>
@@ -49,8 +49,8 @@
               <label class="form-field"><span>জন্মতারিখ <b>*</b></span><input name="dob" type="date" autocomplete="bday" required></label>
               <label class="form-field"><span>Passport নম্বর <b>*</b></span><input name="passport" type="text" autocomplete="off" required maxlength="32" placeholder="পাসপোর্টের সঙ্গে হুবহু মিল"></label>
               <label class="form-field"><span>NID নম্বর</span><input name="nid" type="text" autocomplete="off" maxlength="32" placeholder="যদি প্রযোজ্য হয়"></label>
-              <label class="form-field"><span>ভিসার ধরন</span><select name="visaType"><option value="">নির্বাচন করুন</option><option>Tourist</option><option>Medical</option><option>Business</option><option>Student</option><option>Employment</option><option>Other</option></select></label>
-              <label class="form-field"><span>IVAC কেন্দ্র</span><select name="center"><option value="">নির্বাচন করুন</option><option>Dhaka</option><option>Chattogram</option><option>Rajshahi</option><option>Sylhet</option><option>Khulna</option></select></label>
+              <label class="form-field"><span>ভিসার ধরন</span><select name="visaType"><option value="">নির্বাচন করুন</option><option value="Tourist">Tourist</option><option value="Medical">Medical</option><option value="Business">Business</option><option value="Student">Student</option><option value="Employment">Employment</option><option value="Other">Other</option></select></label>
+              <label class="form-field"><span>IVAC কেন্দ্র</span><select name="center"><option value="">নির্বাচন করুন</option><option value="Dhaka">Dhaka</option><option value="Chattogram">Chattogram</option><option value="Rajshahi">Rajshahi</option><option value="Sylhet">Sylhet</option><option value="Khulna">Khulna</option></select></label>
             </div><div class="form-footer"><label class="remember-control"><input type="checkbox" id="remember-profile"><span>এই device-এ প্রোফাইলটি মনে রাখুন</span></label><button class="button button-primary" type="submit">তথ্য সংরক্ষণ <span>→</span></button></div><p class="inline-status" id="profile-status" role="status" aria-live="polite">প্রোফাইলের তথ্য এই browser-এর local storage-এ থাকবে—IndianVisaBuzz server-এ পাঠানো হবে না।</p>
           </form><div class="callout warning-callout"><strong>গুরুত্বপূর্ণ</strong><span>IVAC portal অনুযায়ী sign-up-এর নাম, জন্মতারিখ, passport, mobile, email এবং NID (যদি লাগে) webfile-এর সঙ্গে হুবহু মিলতে হবে। সর্বশেষ নিয়ম official portal-এ যাচাই করুন।</span></div>
         </section>
