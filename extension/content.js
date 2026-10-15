@@ -1,381 +1,333 @@
-(function () {
+(() => {
   'use strict';
   if (window.__visaBuzzLoaded) return;
   window.__visaBuzzLoaded = true;
 
-  const LOG   = (...a) => console.log('%c[VisaBuzz]', 'color:#3b82f6;font-weight:bold', ...a);
-  const ERR   = (...a) => console.error('[VisaBuzz]', ...a);
-
-  const MAX_PDFS      = 4;
-  const MAX_PDF_BYTES = 500 * 1024;
-  const STORE_KEY     = 'visaBuzzCreds';
-
+  const FILES = globalThis.VisaBuzzFiles;
+  const PROFILE_KEY = 'ivbProfileV2';
   let selectedPdfs = [];
-  let isDragging = false, startX = 0, startY = 0, startLeft = 0, startTop = 0;
+  let targetKeys = [];
 
-  // ───────── helpers ─────────
-  function $(id) { return document.getElementById(id); }
-  function val(id) { return ($(id) || {}).value || ''; }
-  function resolveEl(sel) { return typeof sel === 'function' ? sel() : document.querySelector(sel); }
-  function waitForClickable(sel, cb, timeout = 20000, interval = 350) {
-    const t0 = Date.now();
-    (function check() {
-      const el = resolveEl(sel);
-      const visible = el && el.offsetParent !== null && getComputedStyle(el).visibility !== 'hidden';
-      if (el && visible && !el.disabled && el.getAttribute('aria-disabled') !== 'true') return cb(el);
-      if (Date.now() - t0 >= timeout) return cb(null);
-      setTimeout(check, interval);
-    })();
-  }
-  function waitForElement(sel, cb, timeout = 20000, interval = 350) {
-    const t0 = Date.now();
-    (function check() {
-      const el = resolveEl(sel);
-      if (el) return cb(el);
-      if (Date.now() - t0 >= timeout) return cb(null);
-      setTimeout(check, interval);
-    })();
-  }
-  function findButtonByText(text) {
-    const low = text.toLowerCase();
-    for (const b of document.querySelectorAll('button, a, [role="button"]'))
-      if ((b.textContent || '').trim().toLowerCase().includes(low)) return b;
-    return null;
-  }
-  function setStatus(msg, type = 'info') {
-    const el = $('visa-qa-status'); if (!el) return;
-    el.textContent = msg;
-    el.className = 'visa-qa-status show ' + type;
-    clearTimeout(el._t);
-    el._t = setTimeout(() => { el.textContent = ''; el.className = 'visa-qa-status'; }, 5000);
+  const $ = id => document.getElementById(id);
+  const fieldNames = ['fullName', 'email', 'phone', 'dob', 'passport', 'nid', 'visaType', 'center'];
+  const fieldLabels = {
+    fullName: 'পূর্ণ নাম', email: 'ইমেইল', phone: 'মোবাইল', dob: 'জন্মতারিখ', passport: 'পাসপোর্ট', nid: 'NID', visaType: 'ভিসার ধরন', center: 'IVAC কেন্দ্র'
+  };
+
+  function status(message, kind = 'info') {
+    const node = $('ivb-status');
+    if (!node) return;
+    node.textContent = message;
+    node.dataset.kind = kind;
   }
 
-  // ───────── credentials ─────────
-  function loadCreds(cb) { try { chrome.storage.local.get(STORE_KEY, r => cb((r && r[STORE_KEY]) || {})); } catch (_) { cb({}); } }
-  function saveCreds() {
-    const c = { phone: val('visa-in-phone'), password: val('visa-in-pass'), date: val('visa-in-date') };
-    try { chrome.storage.local.set({ [STORE_KEY]: c }); } catch (_) {}
-    return c;
+  function getProfile() {
+    return Object.fromEntries(fieldNames.map(name => [name, $(`ivb-${name}`).value.trim()]));
   }
-  function getCreds() { return { phone: val('visa-in-phone'), password: val('visa-in-pass'), date: val('visa-in-date') }; }
 
-
-  // ───────── widget UI ─────────
-  function toggleWidget() {
-    const existing = $('visa-qa-widget');
-    if (existing) { existing.remove(); return; }
-    const div = document.createElement('div');
-    div.id = 'visa-qa-widget';
-    div.innerHTML = `
-      <div id="visa-qa-header">
-        <span class="brand">
-          <span class="logo">⚡</span>
-          <span class="brand-text">
-            <span class="brand-name">IndianVisaBuzz</span>
-            <span class="brand-sub">Automation Suite</span>
-          </span>
-        </span>
-        <span class="close-btn" id="visa-qa-close">&times;</span>
-      </div>
-      <div id="visa-qa-body">
-        <div class="license-free-note">Free forever — no license key required.</div>
-        <div class="row">
-          <div class="field">
-            <label class="visa-qa-label">Phone</label>
-            <input class="visa-qa-input" id="visa-in-phone" type="tel" inputmode="numeric" placeholder="01300000000" autocomplete="off" />
-          </div>
-          <div class="field">
-            <label class="visa-qa-label">Password</label>
-            <div class="pass-wrap">
-              <input class="visa-qa-input" id="visa-in-pass" type="password" placeholder="••••••••" autocomplete="off" />
-              <button class="eye" id="visa-toggle-pass" type="button">👁</button>
-            </div>
-          </div>
-        </div>
-        <div class="row">
-          <div class="field">
-            <label class="visa-qa-label">OTP</label>
-            <input class="visa-qa-input" id="visa-in-otp" type="text" inputmode="numeric" maxlength="6" placeholder="6-digit" autocomplete="off" />
-          </div>
-          <div class="field">
-            <label class="visa-qa-label">Appointment Date</label>
-            <input class="visa-qa-input" id="visa-in-date" type="date" />
-          </div>
-        </div>
-        <div class="field">
-          <label class="visa-qa-label">Applicant PDFs <span class="req">(1 primary + up to 3 · 500 KB max)</span></label>
-          <label class="dropzone" id="visa-drop" for="visa-in-pdf">
-            <span class="dz-icon">⬆</span>
-            <span class="dz-text" id="visa-pdf-name">Choose PDF file(s)</span>
-          </label>
-          <input id="visa-in-pdf" type="file" accept=".pdf,application/pdf" multiple hidden />
-          <ul class="pdf-list" id="visa-pdf-list"></ul>
-        </div>
-        <div class="actions">
-          <button class="visa-qa-btn step1" id="btn-step1"><span class="ic">🚀</span><span class="lbl"><b>1</b> Auto Login</span></button>
-          <button class="visa-qa-btn step2" id="btn-step2"><span class="ic">📱</span><span class="lbl"><b>2</b> Verify OTP</span></button>
-          <button class="visa-qa-btn step3" id="btn-step3"><span class="ic">📎</span><span class="lbl"><b>3</b> Upload File</span></button>
-          <button class="visa-qa-btn step4" id="btn-step4"><span class="ic">📅</span><span class="lbl"><b>4</b> Slot Booking</span></button>
-        </div>
-        <div class="visa-qa-status" id="visa-qa-status"></div>
-      </div>
-    `;
-    document.body.appendChild(div);
-
-    loadCreds(c => {
-      if (c.phone) $('visa-in-phone').value = c.phone;
-      if (c.password) $('visa-in-pass').value = c.password;
-      if (c.date) $('visa-in-date').value = c.date;
-    });
-    renderPdfList();
-    $('visa-in-pdf').addEventListener('change', onPdfPicked);
-
-    const header = $('visa-qa-header');
-    header.addEventListener('pointerdown', dragStart);
-    header.addEventListener('pointerup', dragEnd);
-    if (!window.__visaDragBound) {
-      document.addEventListener('pointermove', drag);
-      document.addEventListener('pointerup', dragEnd);
-      window.__visaDragBound = true;
+  function persistProfile() {
+    if ($('ivb-remember').checked) {
+      chrome.storage.local.set({ [PROFILE_KEY]: getProfile() });
+      status('প্রোফাইল এই browser-এ সংরক্ষিত হয়েছে।', 'success');
+    } else {
+      chrome.storage.local.remove(PROFILE_KEY);
+      status('এই তথ্য শুধু এই tab-এ থাকবে।', 'info');
     }
-
-    ['visa-in-phone','visa-in-pass','visa-in-date'].forEach(id => $(id).addEventListener('input', saveCreds));
-
-    $('visa-toggle-pass').addEventListener('click', () => {
-      const p = $('visa-in-pass'); p.type = p.type === 'password' ? 'text' : 'password';
-    });
-    $('visa-qa-close').addEventListener('click', toggleWidget);
-    $('btn-step1').addEventListener('click', runLogin);
-    $('btn-step2').addEventListener('click', runOTP);
-    $('btn-step3').addEventListener('click', runUploadConfirm);
-    $('btn-step4').addEventListener('click', runSlotBooking);
-
-    LOG('Widget ready.');
   }
 
-  // ───────── drag ─────────
-  function dragStart(e) {
-    if (e.target.closest('.close-btn')) return;
-    if (!e.target.closest('#visa-qa-header')) return;
-    const w = $('visa-qa-widget'); if (!w) return;
-    const r = w.getBoundingClientRect();
-    w.style.left = r.left + 'px'; w.style.top = r.top + 'px';
-    w.style.right = 'auto'; w.style.bottom = 'auto'; w.style.transform = 'none';
-    w.style.transition = 'none'; w.classList.add('dragging');
-    startX = e.clientX; startY = e.clientY; startLeft = r.left; startTop = r.top;
-    isDragging = true;
-    try { e.currentTarget.setPointerCapture(e.pointerId); } catch (_) {}
-    e.preventDefault();
-  }
-  function drag(e) {
-    if (!isDragging) return;
-    e.preventDefault();
-    const w = $('visa-qa-widget'); if (!w) return;
-    let l = startLeft + (e.clientX - startX);
-    let t = startTop  + (e.clientY - startY);
-    l = Math.min(Math.max(0, l), Math.max(0, window.innerWidth  - w.offsetWidth));
-    t = Math.min(Math.max(0, t), Math.max(0, window.innerHeight - w.offsetHeight));
-    w.style.left = l + 'px'; w.style.top = t + 'px';
-  }
-  function dragEnd(e) {
-    if (!isDragging) return;
-    isDragging = false;
-    const w = $('visa-qa-widget');
-    if (w) { w.style.transition = 'opacity 0.2s ease, transform 0.2s ease'; w.classList.remove('dragging'); }
-    try { e.currentTarget.releasePointerCapture(e.pointerId); } catch (_) {}
+  function safeFillValue(input, value) {
+    let nextValue = value;
+    if (input.tagName === 'SELECT') {
+      const desired = String(value).trim().toLocaleLowerCase();
+      const option = [...input.options].find(item => item.value.trim().toLocaleLowerCase() === desired || item.textContent.trim().toLocaleLowerCase() === desired);
+      if (!option) return false;
+      nextValue = option.value;
+    }
+    const descriptor = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(input), 'value');
+    if (descriptor && descriptor.set) descriptor.set.call(input, nextValue);
+    else input.value = nextValue;
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+    return String(input.value).trim().toLocaleLowerCase() === String(nextValue).trim().toLocaleLowerCase();
   }
 
-  // ───────── PDFs ─────────
-  function onPdfPicked(e) {
-    const files = Array.from(e.target.files || []);
-    e.target.value = '';
-    if (!files.length) return;
-    let errs = [];
-    files.forEach(f => {
-      if (f.type !== 'application/pdf' && !f.name.toLowerCase().endsWith('.pdf')) return errs.push(f.name + ': not a PDF');
-      if (f.size > MAX_PDF_BYTES) return errs.push(f.name + ': >500 KB');
-      if (selectedPdfs.length >= MAX_PDFS) return errs.push('Max ' + MAX_PDFS + ' files allowed');
-      if (!selectedPdfs.some(p => p.name === f.name)) selectedPdfs.push(f);
-    });
-    if (errs.length) setStatus(errs[0], 'error');
-    renderPdfList();
-  }
-  function renderPdfList() {
-    const list = $('visa-pdf-list'), drop = $('visa-drop'), nameEl = $('visa-pdf-name');
-    if (!list) return;
-    list.innerHTML = '';
-    if (!selectedPdfs.length) { drop.classList.remove('has-file'); nameEl.textContent = 'Choose PDF file(s)'; return; }
-    drop.classList.add('has-file');
-    nameEl.textContent = selectedPdfs.length === 1 ? selectedPdfs[0].name : selectedPdfs.length + ' files selected';
-    selectedPdfs.forEach((f, i) => {
-      const li = document.createElement('li');
-      li.className = 'pdf-item';
-      li.innerHTML = `<span class="pdf-badge">${i === 0 ? 'Primary' : 'Extra ' + i}</span>
-        <span class="pdf-fname" title="${f.name}">${f.name}</span>
-        <span class="pdf-size">${(f.size/1024).toFixed(0)} KB</span>
-        <button class="pdf-remove" data-idx="${i}" title="Remove">×</button>`;
-      list.appendChild(li);
-    });
-    list.querySelectorAll('.pdf-remove').forEach(b => b.addEventListener('click', e => {
-      selectedPdfs.splice(parseInt(e.target.dataset.idx, 10), 1);
-      renderPdfList();
-    }));
+  function fieldText(input) {
+    const parts = [input.name, input.id, input.placeholder, input.getAttribute('aria-label'), input.autocomplete];
+    if (input.labels) parts.push(...Array.from(input.labels, label => label.textContent));
+    const labelledBy = input.getAttribute('aria-labelledby');
+    if (labelledBy) parts.push(...labelledBy.split(/\s+/).map(id => document.getElementById(id)?.textContent || ''));
+    return parts.filter(Boolean).join(' ').toLowerCase();
   }
 
-  // ───────── step 1: login ─────────
-  function runLogin() {
-    const { phone, password } = getCreds();
-    saveCreds();
-    if (!phone || !password) return setStatus('Enter phone and password first.', 'error');
-    const p = document.querySelector('input[name="phone"]');
-    if (p) { p.value = phone; p.dispatchEvent(new Event('input', { bubbles: true })); }
-    const w = document.querySelector('input[name="password"]');
-    if (w) { w.value = password; w.dispatchEvent(new Event('input', { bubbles: true })); }
-    setStatus('Filled login. Waiting for Sign In…', 'info');
-    waitForClickable('button[type="submit"]', btn => {
-      if (btn) { btn.click(); setStatus('Sign In clicked ✓', 'success'); }
-      else setStatus('Sign In stayed disabled — solve captcha.', 'error');
-    }, 30000);
-  }
+  const patterns = {
+    fullName: /full.?name|applicant.?name|name.?of.?applicant|name.?as.?in.?passport/,
+    email: /e.?mail/,
+    phone: /mobile|phone|contact.?number|telephone/,
+    dob: /date.?of.?birth|birth.?date|\bdob\b/,
+    passport: /passport.?number|passport.?no|passport.?id|passport.?num/,
+    nid: /national.?id|\bnid\b|identity.?number/,
+    visaType: /visa.?type|type.?of.?visa|visa.?category|category.?of.?visa|purpose.?of.?visit/,
+    center: /ivac|consulate|centre|center|mission/
+  };
 
-  // ───────── step 2: OTP ─────────
-  function runOTP() {
-    const otp = val('visa-in-otp').replace(/\D/g, '');
-    const first = document.querySelector('input[id^="otp-"], input[name="otp"]');
-    if (!first) return setStatus('OTP field not found.', 'error');
-    if (otp.length === 6) {
-      fillPageOtp(otp);
-      setStatus('OTP entered. Verifying…', 'info');
-      waitForClickable('button[type="submit"]', btn => { if (btn) btn.click(); afterOtpVerify(); }, 15000);
+  function fillForm() {
+    const profile = getProfile();
+    const inputs = [...document.querySelectorAll('input:not([type="file"]):not([type="password"]):not([type="hidden"]),textarea,select')]
+      .filter(input => !input.closest('#ivb-widget') && !input.disabled && input.type !== 'checkbox' && input.type !== 'radio');
+    const filled = [];
+    const unmatched = [];
+    for (const key of fieldNames) {
+      if (!profile[key]) continue;
+      const field = inputs.find(input => patterns[key].test(fieldText(input)) && !filled.some(item => item.input === input));
+      if (!field) {
+        unmatched.push(fieldLabels[key]);
+        continue;
+      }
+      if (!safeFillValue(field, profile[key])) {
+        unmatched.push(fieldLabels[key]);
+        continue;
+      }
+      filled.push({ input: field, key });
+    }
+    if ($('ivb-remember').checked) persistProfile();
+    if (!filled.length) {
+      status('চেনা কোনো profile field পাওয়া যায়নি। portal-এর label দেখে নিজে পূরণ করুন।', 'error');
       return;
     }
-    try { first.focus(); } catch (_) {}
-    setStatus('Type OTP above, or enter on the page.', 'info');
-    if (!first._listenerAttached) {
-      first.addEventListener('input', function () {
-        if (this.value.length === 6) {
-          const s = document.querySelector('button[type="submit"]');
-          if (s) s.click();
-          afterOtpVerify();
-        }
-      });
-      first._listenerAttached = true;
-    }
-  }
-  function fillPageOtp(otp) {
-    const inputs = document.querySelectorAll('input[id^="otp-"]');
-    if (inputs.length >= 2) {
-      otp.split('').forEach((d, i) => {
-        const el = $('otp-' + i);
-        if (el) { el.value = d; el.dispatchEvent(new Event('input', { bubbles: true })); el.dispatchEvent(new Event('change', { bubbles: true })); }
-      });
-    } else {
-      const el = document.querySelector('input[name="otp"]');
-      if (el) { el.value = otp; el.dispatchEvent(new Event('input', { bubbles: true })); el.dispatchEvent(new Event('change', { bubbles: true })); }
-    }
-  }
-  function afterOtpVerify() {
-    setStatus('OTP verified. Waiting…', 'success');
-    waitForClickable(() => document.querySelector('a[href="/appointment/notice"]') || findButtonByText('Confirm Mission'), btn => {
-      if (btn) { btn.click(); setStatus('Appointment notice ✓', 'success'); }
-    }, 25000);
+    status(`${filled.length}টি field পূরণ হয়েছে। ${unmatched.length ? `${unmatched.join(', ')} নিজে দেখুন।` : 'প্রতিটি তথ্য portal-এ মিলিয়ে নিন।'}`, 'success');
   }
 
-  // ───────── step 3: upload + confirm ─────────
-  function runUploadConfirm() {
-    if (!selectedPdfs.length) return setStatus('Choose at least one PDF first.', 'error');
-    setStatus('Locating upload field…', 'info');
-    waitForElement('input[type="file"]', inp => {
-      if (!inp) return setStatus('Upload field not found.', 'error');
-      uploadFilesSequentially(0, confirmAndSave);
+  function portalFieldLabel(input, index) {
+    const labels = Array.from(input.labels || []).map(label => label.textContent.trim()).filter(Boolean);
+    return labels[0] || input.getAttribute('aria-label') || input.name || input.id || `Document field ${index + 1}`;
+  }
+
+  function portalFieldKey(input, index) {
+    const labels = Array.from(input.labels || []).map(label => label.textContent.trim()).join(' ');
+    return `${index}|${input.id}|${input.name}|${labels}|${input.accept || ''}`;
+  }
+
+  function renderFiles() {
+    const list = $('ivb-file-list');
+    const targets = portalFileInputs();
+    list.replaceChildren();
+    if (!selectedPdfs.length) {
+      const empty = document.createElement('li');
+      empty.className = 'ivb-empty';
+      empty.textContent = 'এখনও কোনো PDF নির্বাচন করা হয়নি।';
+      list.append(empty);
+      $('ivb-file-summary').textContent = '0 / 4 file';
+      return;
+    }
+    $('ivb-file-summary').textContent = `${selectedPdfs.length} / 4 file`;
+    selectedPdfs.forEach((file, index) => {
+      const item = document.createElement('li');
+      item.className = 'ivb-file';
+      const label = document.createElement('span');
+      label.className = 'ivb-file-index';
+      label.textContent = index === 0 ? 'প্রধান' : `অতিরিক্ত ${index}`;
+      const name = document.createElement('span');
+      name.className = 'ivb-file-name';
+      name.textContent = file.name;
+      name.title = file.name;
+      const size = document.createElement('small');
+      size.textContent = `${Math.ceil(file.size / 1024)} KB`;
+      const remove = document.createElement('button');
+      remove.type = 'button';
+      remove.className = 'ivb-remove';
+      remove.textContent = '×';
+      remove.setAttribute('aria-label', `${file.name} সরান`);
+      remove.addEventListener('click', () => {
+        selectedPdfs.splice(index, 1);
+        targetKeys.splice(index, 1);
+        renderFiles();
+      });
+      const target = document.createElement('select');
+      target.className = 'ivb-target';
+      target.setAttribute('aria-label', `${file.name} এর portal upload field`);
+      const placeholder = document.createElement('option');
+      placeholder.value = '';
+      placeholder.textContent = targets.length ? 'Portal-এর document field বাছুন' : 'আগে portal-এর upload form খুলুন';
+      target.append(placeholder);
+      targets.forEach((input, targetIndex) => {
+        const option = document.createElement('option');
+        option.value = portalFieldKey(input, targetIndex);
+        option.textContent = `${portalFieldLabel(input, targetIndex)}${input.files && input.files.length ? ' · file আছে' : ''}`;
+        option.disabled = Boolean(input.files && input.files.length);
+        target.append(option);
+      });
+      target.value = targetKeys[index] || '';
+      target.disabled = targets.length === 0;
+      target.addEventListener('change', () => { targetKeys[index] = target.value; });
+      item.append(label, name, size, target, remove);
+      list.append(item);
     });
   }
-  function uploadFilesSequentially(idx, done) {
-    if (idx >= selectedPdfs.length) return done();
-    const file = selectedPdfs[idx];
-    const inputs = Array.from(document.querySelectorAll('input[type="file"]'));
-    const target = inputs.find(i => !i.files || i.files.length === 0) || inputs[inputs.length - 1];
-    if (!target) return setStatus('No upload field for file ' + (idx + 1), 'error');
+
+  async function onFilesPicked(event) {
+    const picker = event.target;
+    const incoming = [...(picker.files || [])];
+    picker.value = '';
+    picker.disabled = true;
+    status('PDF file-এর content যাচাই করা হচ্ছে…', 'info');
     try {
-      const dt = new DataTransfer();
-      dt.items.add(file);
-      target.files = dt.files;
-      target.dispatchEvent(new Event('input', { bubbles: true }));
-      target.dispatchEvent(new Event('change', { bubbles: true }));
-      setStatus(`${idx === 0 ? 'Primary' : 'Extra ' + idx} uploaded (${idx + 1}/${selectedPdfs.length}) ✓`, 'success');
-    } catch (_) { return setStatus('Browser blocked file injection.', 'error'); }
-    if (idx + 1 < selectedPdfs.length) {
-      let attempts = 0;
-      const wait = () => {
-        const empty = Array.from(document.querySelectorAll('input[type="file"]')).some(i => !i.files || i.files.length === 0);
-        if (empty || attempts >= 4000) uploadFilesSequentially(idx + 1, done);
-        else { attempts += 400; setTimeout(wait, 400); }
-      };
-      setTimeout(wait, 600);
-    } else done();
-  }
-  function confirmAndSave() {
-    const s = document.querySelector('button[type="submit"]');
-    if (s) s.click();
-    setStatus('Waiting for confirm button…', 'info');
-    waitForClickable(() => findButtonByText('Confirm All Information') || findButtonByText('Confirm All') || document.querySelector('button.bg-\\[\\#FF671F\\]'), btn => {
-      if (!btn) return setStatus('Confirm button stayed disabled.', 'error');
-      btn.click();
-      setStatus('Confirmed ✓', 'success');
-      waitForClickable(() => findButtonByText('Save & Continue') || findButtonByText('Save'), save => {
-        if (save) { save.click(); setStatus('Save & Continue ✓', 'success'); }
-      }, 30000);
-    }, 40000);
+      const previousTargets = new Map(selectedPdfs.map((file, index) => [file, targetKeys[index]]));
+      const result = await FILES.validatePdfFiles([...selectedPdfs, ...incoming]);
+      selectedPdfs = result.files;
+      targetKeys = selectedPdfs.map(file => previousTargets.get(file) || '');
+      renderFiles();
+      if (result.errors.length) status(result.errors[0], 'error');
+      else if (selectedPdfs.length) status(`${selectedPdfs.length}টি PDF যাচাই হয়েছে। Upload করলে portal-এও যাচাই করুন।`, 'success');
+    } catch (_) {
+      status('PDF file যাচাই করা যায়নি; portal-এ নিজে file বাছুন।', 'error');
+    } finally {
+      picker.disabled = false;
+    }
   }
 
-  // ───────── step 4: slot booking ─────────
-  function runSlotBooking() {
-    const { date } = getCreds();
-    saveCreds();
-    if (!date) return setStatus('Pick an appointment date first.', 'error');
-    setStatus('Confirming mission…', 'info');
-    waitForClickable(() => findButtonByText('Confirm Mission') || findButtonByText('Confirm Mission & IVAC') || document.querySelector('a[href="/appointment/notice"]'), btn => {
-      if (btn) { btn.click(); setStatus('Mission confirmed ✓', 'success'); }
-      waitForElement(() => document.querySelector('.grid.grid-cols-7'), () => selectCalendarDate(date));
-    }, 30000);
+  function portalFileInputs() {
+    return [...document.querySelectorAll('input[type="file"]')].filter(input => {
+      if (input.closest('#ivb-widget')) return false;
+      const style = getComputedStyle(input);
+      const rect = input.getBoundingClientRect();
+      const inputVisible = rect.width > 2 && rect.height > 2 && style.display !== 'none' && style.visibility !== 'hidden' && style.opacity !== '0';
+      const labels = Array.from(input.labels || []);
+      const visibleLabel = labels.some(label => {
+        const labelStyle = getComputedStyle(label);
+        const labelRect = label.getBoundingClientRect();
+        return labelRect.width > 2 && labelRect.height > 2 && labelStyle.display !== 'none' && labelStyle.visibility !== 'hidden';
+      });
+      return FILES.isPortalPdfInputCandidate({
+        type: input.type, accept: input.accept, name: input.name, id: input.id, title: input.title,
+        ariaLabel: input.getAttribute('aria-label'), labelText: labels.map(label => label.textContent).join(' '),
+        disabled: input.disabled, connected: input.isConnected, visible: inputVisible || visibleLabel
+      });
+    });
   }
-  function selectCalendarDate(dateStr) {
-    const [y, m, d] = dateStr.split('-').map(Number);
-    const targetMonth = new Date(y, m - 1, 1).toLocaleString('en-US', { month: 'long' });
-    let attempts = 0;
-    (function tryFind() {
-      attempts++;
-      const header = getCalendarHeaderText();
-      if (header && header.toLowerCase().includes(targetMonth.toLowerCase()) && header.includes(String(y))) {
-        const day = findEnabledDayButton(d);
-        if (day) {
-          day.click();
-          setStatus('Date ' + dateStr + ' selected ✓', 'success');
-          waitForClickable(() => findButtonByText('Continue Booking'), cont => {
-            if (cont) { cont.click(); setStatus('Continue Booking ✓', 'success'); }
-          }, 30000);
-        } else setStatus('Day ' + d + ' not available.', 'error');
+
+  function assignFileList(input, files) {
+    const transfer = new DataTransfer();
+    files.forEach(file => transfer.items.add(file));
+    input.files = transfer.files;
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+  }
+
+  function fileNames(input) {
+    return [...(input.files || [])].map(file => file.name);
+  }
+
+  function wait(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  async function attachFiles() {
+    if (!selectedPdfs.length) {
+      status('আগে সর্বোচ্চ চারটি PDF নির্বাচন করুন।', 'error');
+      return;
+    }
+    const fields = portalFileInputs();
+    const fieldKeys = fields.map((input, index) => portalFieldKey(input, index));
+    const targetIndices = targetKeys.map(key => key ? fieldKeys.indexOf(key) : '');
+    const plan = FILES.createMappedUploadPlan(selectedPdfs, fields, targetIndices);
+    if (!plan.ok) {
+      const messages = {
+        'no-files': 'কোনো PDF নির্বাচন করা হয়নি।',
+        'target-required': 'প্রতিটি PDF-এর জন্য portal-এর সঠিক document field নির্বাচন করুন।',
+        'invalid-target': 'Portal-এর upload field বদলে গেছে। বর্তমান form দেখে field আবার নির্বাচন করুন।',
+        'target-populated': 'নির্বাচিত portal field-এ আগে থেকেই file আছে। কোনো file overwrite করা হয়নি।',
+        'single-field-reused': 'একটি single-file field একাধিক PDF-এর জন্য বেছে নেওয়া হয়েছে। আলাদা field বাছুন।'
+      };
+      status(messages[plan.reason] || 'Upload field নিরাপদভাবে নির্ধারণ করা যায়নি; portal-এ নিজে file attach করুন।', 'error');
+      return;
+    }
+
+    status('নির্বাচিত document field-এ PDF attach করা হচ্ছে…', 'info');
+    const targets = plan.assignments.map(assignment => ({
+      key: portalFieldKey(assignment.input, fields.indexOf(assignment.input)),
+      files: assignment.files
+    }));
+    try {
+      for (const assignment of plan.assignments) {
+        if (!assignment.input.isConnected || (assignment.input.files && assignment.input.files.length)) {
+          status('Portal-এর নির্বাচিত field বদলে গেছে বা file আছে। কোনো file overwrite বা submit করা হয়নি।', 'error');
+          return;
+        }
+        assignFileList(assignment.input, assignment.files);
+        await wait(250);
+      }
+      await wait(350);
+      const currentInputs = portalFileInputs();
+      const currentKeys = currentInputs.map((input, index) => portalFieldKey(input, index));
+      const allAttached = targets.every(target => {
+        const index = currentKeys.indexOf(target.key);
+        if (index < 0) return false;
+        const actual = fileNames(currentInputs[index]);
+        return target.files.every(file => currentInputs[index].files && [...currentInputs[index].files].some(actualFile => FILES.fileIdentity(actualFile) === FILES.fileIdentity(file)));
+      });
+      const attachedCount = currentInputs.reduce((count, input) => count + fileNames(input).length, 0);
+      const mappedFileCount = plan.assignments.reduce((count, assignment) => count + assignment.files.length, 0);
+      if (!allAttached || mappedFileCount !== selectedPdfs.length) {
+        status(`সব file নির্বাচিত field-এ নিশ্চিত করা যায়নি (${attachedCount}টি input file দেখা যাচ্ছে)। Portal নিজে দেখে নিন; extension submit করেনি।`, 'error');
         return;
       }
-      if (attempts > 24) return setStatus('Could not reach that month.', 'error');
-      const next = document.querySelector('button[aria-label="Next month"]');
-      if (next) { next.click(); setTimeout(tryFind, 300); }
-    })();
-  }
-  function getCalendarHeaderText() {
-    const g = document.querySelector('.grid.grid-cols-7');
-    return g && g.parentElement ? (g.parentElement.textContent || '').trim() : '';
-  }
-  function findEnabledDayButton(day) {
-    for (const b of document.querySelectorAll('.grid.grid-cols-7 button[type="button"]'))
-      if ((b.textContent || '').trim() === String(day) && !b.disabled) return b;
-    return null;
+      status(`${selectedPdfs.length}/${selectedPdfs.length}টি PDF আপনার বেছে নেওয়া portal field-এ attach হয়েছে। ফাইল ও label দেখে upload/submit নিজে করুন।`, 'success');
+    } catch (error) {
+      status('Browser file attach গ্রহণ করেনি। আগের field-এ কিছু file attach হয়ে থাকতে পারে—portal নিজে যাচাই করুন; native file picker ব্যবহার করুন। কিছু submit হয়নি।', 'error');
+    }
   }
 
-  // ───────── messages from background ─────────
-  chrome.runtime.onMessage.addListener(req => {
-    if (req.action === 'toggle_widget') toggleWidget();
+  function makeWidget() {
+    if ($('ivb-widget')) {
+      $('ivb-widget').remove();
+      return;
+    }
+    const panel = document.createElement('section');
+    panel.id = 'ivb-widget';
+    panel.setAttribute('aria-label', 'IndianVisaBuzz assistant');
+    panel.innerHTML = `
+      <header class="ivb-head"><div class="ivb-brand-mark" aria-hidden="true"><span></span></div><div class="ivb-brand"><strong>IndianVisaBuzz</strong><small>Visa preparation assistant</small></div><button class="ivb-close" id="ivb-close" type="button" aria-label="বন্ধ করুন">×</button></header>
+      <div class="ivb-body">
+        <p class="ivb-notice">Profile browser-এ থাকে। Attach করলে portal file নিজেই upload করতে পারে—portal field ও ফলাফল যাচাই করুন।</p>
+        <div class="ivb-fields">
+          <label>পূর্ণ নাম<input id="ivb-fullName" autocomplete="off" maxlength="120"></label>
+          <label>ইমেইল<input id="ivb-email" type="email" autocomplete="off" maxlength="160"></label>
+          <label>মোবাইল<input id="ivb-phone" type="tel" autocomplete="off" maxlength="32"></label>
+          <label>জন্মতারিখ<input id="ivb-dob" type="date" autocomplete="off"></label>
+          <label>Passport no.<input id="ivb-passport" autocomplete="off" maxlength="32"></label>
+          <label>NID no.<input id="ivb-nid" autocomplete="off" maxlength="32"></label>
+          <label>ভিসার ধরন<select id="ivb-visaType"><option value="">নির্বাচন করুন</option><option>Tourist</option><option>Medical</option><option>Business</option><option>Student</option><option>Employment</option></select></label>
+          <label>IVAC কেন্দ্র<select id="ivb-center"><option value="">নির্বাচন করুন</option><option>Dhaka</option><option>Chattogram</option><option>Rajshahi</option><option>Sylhet</option><option>Khulna</option></select></label>
+        </div>
+        <label class="ivb-remember"><input type="checkbox" id="ivb-remember"><span>এই device-এ profile মনে রাখুন</span></label>
+        <button class="ivb-button ivb-fill" id="ivb-fill" type="button">তথ্য দিয়ে form পূরণ</button>
+        <div class="ivb-upload-head"><div><strong>PDF নথি</strong><small>সর্বোচ্চ ৪টি · 500 KB করে</small></div><span id="ivb-file-summary">0 / 4 file</span></div>
+        <label class="ivb-picker" for="ivb-pdf-picker">PDF file নির্বাচন করুন<input id="ivb-pdf-picker" type="file" accept="application/pdf,.pdf" multiple></label>
+        <ul class="ivb-file-list" id="ivb-file-list"></ul>
+        <button class="ivb-button ivb-upload" id="ivb-attach" type="button">নির্বাচিত field-এ attach করুন</button>
+        <p class="ivb-safety">Attach-এ portal file input বদলায়; portal সঙ্গে সঙ্গে upload করতে পারে। Extension password, OTP/CAPTCHA নেয় না এবং submit/booking করে না.</p>
+        <div class="ivb-status" id="ivb-status" data-kind="info" role="status" aria-live="polite">প্রস্তুত।</div>
+      </div>`;
+    document.body.append(panel);
+    chrome.storage.local.get(PROFILE_KEY, result => {
+      const saved = result && result[PROFILE_KEY];
+      if (!saved) return;
+      fieldNames.forEach(key => { if (typeof saved[key] === 'string') $(`ivb-${key}`).value = saved[key]; });
+      $('ivb-remember').checked = true;
+    });
+    $('ivb-close').addEventListener('click', () => panel.remove());
+    $('ivb-fill').addEventListener('click', fillForm);
+    $('ivb-remember').addEventListener('change', persistProfile);
+    $('ivb-pdf-picker').addEventListener('change', onFilesPicked);
+    $('ivb-attach').addEventListener('click', attachFiles);
+    $('ivb-widget').querySelectorAll('.ivb-fields input, .ivb-fields select').forEach(input => {
+      input.addEventListener('input', () => { if ($('ivb-remember').checked) persistProfile(); });
+      input.addEventListener('change', () => { if ($('ivb-remember').checked) persistProfile(); });
+    });
+    renderFiles();
+  }
+
+  chrome.runtime.onMessage.addListener(request => {
+    if (request && request.action === 'toggle_widget') makeWidget();
   });
-
-  LOG('Ready. Click the extension icon to toggle.');
 })();

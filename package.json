@@ -1,10 +1,12 @@
 {
   "name": "indianvisabuzz",
   "version": "1.0.0",
-  "description": "Evergreen Indian Visa automation suite — HMAC license system, no DB required.",
+  "description": "Applicant preparation dashboard and browser-based Indian visa form assistant.",
   "scripts": {
     "dev": "vercel dev",
-    "gen": "node scripts/gen-key.js"
+    "gen": "node scripts/gen-key.js",
+    "test": "node --test",
+    "build:extension": "node scripts/build-extension.js"
   },
   "dependencies": {
     "dotenv": "^16.4.5"

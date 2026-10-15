@@ -1,110 +1,87 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="bn">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<meta name="description" content="IndianVisaBuzz is a free Chrome Extension for assisted Indian visa application automation." />
-<title>IndianVisaBuzz – Free Indian Visa Automation Assistant</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="style.css" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6f8f7">
+  <meta name="description" content="IndianVisaBuzz — ভারতীয় ভিসা আবেদন প্রস্তুতি, ডকুমেন্ট চেকলিস্ট এবং অফিসিয়াল appointment source এক জায়গায়।">
+  <title>IndianVisaBuzz — ভিসা প্রস্তুতি workspace</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css"><script defer src="/app.js"></script>
 </head>
 <body>
-<div class="container">
-  <nav class="navbar" aria-label="Main navigation">
-    <a class="logo" href="/" aria-label="IndianVisaBuzz home"><div class="logo-icon">⚡</div>Indian<span>VisaBuzz</span></a>
-    <div class="nav-links">
-      <a href="#features">Features</a>
-      <a href="#free">Free Forever</a>
-      <a href="#howto">Guide</a>
-      <a href="#download" class="btn btn-primary btn-sm">📥 Download</a>
-    </div>
-  </nav>
-</div>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="প্রধান নেভিগেশন">
+      <a class="brand" href="#overview" aria-label="IndianVisaBuzz overview"><span class="brand-mark" aria-hidden="true"><span></span></span><span class="brand-copy"><strong>IndianVisaBuzz</strong><small>Visa preparation</small></span></a>
+      <div class="workspace-label">আপনার workspace</div>
+      <nav class="side-nav">
+        <button class="nav-item active" type="button" data-view="overview"><span class="nav-icon">◫</span><span>সংক্ষিপ্ত বিবরণ</span></button>
+        <button class="nav-item" type="button" data-view="profile"><span class="nav-icon">○</span><span>আবেদনকারীর তথ্য</span></button>
+        <button class="nav-item" type="button" data-view="documents"><span class="nav-icon">▤</span><span>ডকুমেন্ট প্রস্তুতি</span></button>
+        <button class="nav-item" type="button" data-view="slot-buddy"><span class="nav-icon">◷</span><span>Slot Buddy</span><span class="nav-count">উৎস</span></button>
+        <button class="nav-item" type="button" data-view="extension"><span class="nav-icon">⌘</span><span>ব্রাউজার সহায়ক</span></button>
+      </nav>
+      <div class="sidebar-bottom"><div class="local-note"><span class="local-dot"></span><span><strong>আপনার ডিভাইসেই</strong><small>প্রোফাইলের তথ্য বাইরে পাঠানো হয় না</small></span></div><a class="side-link" href="https://appointment.ivacbd.com/" target="_blank" rel="noopener noreferrer">অফিসিয়াল appointment portal <span>↗</span></a></div>
+    </aside>
+    <main class="main-area">
+      <header class="topbar"><div class="breadcrumbs"><span>IndianVisaBuzz</span><span class="crumb-sep">/</span><strong id="page-label">সংক্ষিপ্ত বিবরণ</strong></div><div class="topbar-actions"><span class="source-pill"><span></span> অফিসিয়াল source-ভিত্তিক</span><a class="top-link" href="https://appointment.ivacbd.com/" target="_blank" rel="noopener noreferrer">IVAC portal ↗</a></div></header>
+      <div class="content-wrap">
+        <section class="page-view active" data-page="overview" aria-labelledby="overview-title">
+          <div class="welcome-row"><div><p class="eyebrow">আবেদন প্রস্তুতি</p><h1 id="overview-title">আপনার ভিসা প্রস্তুতি,<br><span>এক জায়গায়।</span></h1><p class="intro-copy">আবেদনকারীর তথ্য গুছিয়ে রাখুন, ডকুমেন্ট যাচাই করুন, তারপর অফিসিয়াল পোর্টালে নিজে এগিয়ে যান।</p></div><div class="welcome-actions"><button class="button button-primary" type="button" data-go="profile">তথ্য প্রস্তুত করুন <span>→</span></button><button class="button button-secondary" type="button" data-go="slot-buddy">Slot Buddy দেখুন</button></div></div>
+          <div class="notice-card" role="note"><div class="notice-symbol" aria-hidden="true">i</div><div class="notice-content"><div class="notice-heading"><strong>অফিসিয়াল appointment নির্দেশনা</strong><span class="source-tag">IVAC portal</span></div><p>বর্তমানে পোর্টালে প্রদর্শিত নোটিশে webfile upload-এর সময় 09:00–16:30 এবং (tourist visa ছাড়া) পরবর্তী কর্মদিবসের slot খোলার সময় 17:00 বলা হয়েছে। নিয়ম পরিবর্তন হতে পারে—কাজের আগে মূল portal-এ মিলিয়ে নিন।</p><a href="https://appointment.ivacbd.com/" target="_blank" rel="noopener noreferrer">উৎস: appointment.ivacbd.com ↗</a></div></div>
+          <div class="section-heading"><div><p class="eyebrow">আজকের প্রস্তুতি</p><h2>আবেদনের অবস্থা</h2></div><span class="updated-label">প্রোফাইল ও ফাইল এই browser-এ থাকে</span></div>
+          <div class="summary-grid">
+            <article class="summary-card"><div class="summary-top"><span>প্রোফাইল</span><span class="summary-icon teal">○</span></div><strong id="profile-progress">0%</strong><div class="progress-track"><span id="profile-progress-bar"></span></div><small id="profile-summary">তথ্য যোগ করা হয়নি</small><button type="button" class="text-action" data-go="profile">তথ্য পূরণ করুন →</button></article>
+            <article class="summary-card"><div class="summary-top"><span>ডকুমেন্ট</span><span class="summary-icon amber">▤</span></div><strong id="document-progress">0 / 4</strong><div class="progress-track amber-track"><span id="document-progress-bar"></span></div><small id="document-summary">PDF নির্বাচন করা হয়নি</small><button type="button" class="text-action" data-go="documents">চেকলিস্ট খুলুন →</button></article>
+            <article class="summary-card portal-card"><div class="summary-top"><span>পরবর্তী ধাপ</span><span class="summary-icon">↗</span></div><strong class="portal-title">অফিসিয়াল পোর্টাল</strong><p>তথ্য, CAPTCHA, সম্মতি ও appointment নিজে যাচাই করে সম্পন্ন করুন।</p><a class="text-action" href="https://appointment.ivacbd.com/" target="_blank" rel="noopener noreferrer">পোর্টালে যান →</a></article>
+          </div>
+          <div class="lower-grid"><article class="panel next-panel"><div class="panel-heading"><div><p class="eyebrow">প্রস্তাবিত কাজ</p><h2>আপনার পরের পদক্ষেপ</h2></div><span class="step-badge">৩ ধাপ</span></div><ol class="task-list"><li><span class="task-number">01</span><div><strong>আবেদনকারীর তথ্য মিলিয়ে নিন</strong><small>নাম, জন্মতারিখ, passport ও contact details webfile-এর সঙ্গে এক রাখুন।</small></div><button type="button" aria-label="আবেদনকারীর তথ্য খুলুন" data-go="profile">→</button></li><li><span class="task-number">02</span><div><strong>প্রয়োজনীয় PDF প্রস্তুত করুন</strong><small>ফাইলের নাম, পাঠযোগ্যতা ও official requirement যাচাই করুন।</small></div><button type="button" aria-label="ডকুমেন্ট খুলুন" data-go="documents">→</button></li><li><span class="task-number">03</span><div><strong>Slot ও নিয়ম official source-এ দেখুন</strong><small>কোনো তৃতীয় পক্ষের “guaranteed slot” অফারে অর্থ দেবেন না।</small></div><button type="button" aria-label="Slot Buddy খুলুন" data-go="slot-buddy">→</button></li></ol></article><article class="panel privacy-panel"><div class="privacy-icon" aria-hidden="true">⌑</div><p class="eyebrow">গোপনীয়তা</p><h2>তথ্য আপনার নিয়ন্ত্রণে</h2><p>প্রোফাইল কেবল এই browser-এ রাখা যায়। নির্বাচিত PDF IndianVisaBuzz server-এ upload হয় না; extension দিয়ে official portal-এ attach করলে portal নিজস্ব নিয়মে তা upload করতে পারে। Extension password, OTP বা CAPTCHA সংরক্ষণ করে না।</p><button class="text-action" type="button" data-go="extension">কীভাবে extension কাজ করে →</button></article></div>
+        </section>
 
-<section class="container">
-  <div class="hero">
-    <div class="hero-content">
-      <div class="eyebrow"><span class="eyebrow-dot"></span>Free browser automation assistant</div>
-      <h1>Indian Visa <br /><span class="highlight">Automator</span></h1>
-      <p>Complete repetitive visa-application browser tasks faster from home. Assisted automation for login, OTP verification, PDF uploads, and appointment slot selection.</p>
-      <div class="hero-actions">
-        <a href="#download" class="btn btn-primary">🚀 Get Started</a>
-        <a href="#howto" class="btn btn-outline">How it works</a>
+        <section class="page-view" data-page="profile" aria-labelledby="profile-title" hidden>
+          <div class="page-heading"><div><p class="eyebrow">স্থানীয় প্রোফাইল</p><h1 id="profile-title">আবেদনকারীর তথ্য</h1><p class="intro-copy">সঠিক তথ্য দিয়ে ফর্ম পূরণে সহায়তা নিন। সরকারি ফর্মে পাঠানোর আগে প্রতিটি ঘর মিলিয়ে দেখুন।</p></div><span class="local-badge"><span></span> browser-এ সংরক্ষণ</span></div>
+          <form id="profile-form" class="panel profile-form" autocomplete="on"><div class="form-section-head"><div><h2>প্রাথমিক তথ্য</h2><p>যে তথ্যগুলো portal sign-up-এর সঙ্গে মিলতে হবে, সেগুলো যাচাই করুন।</p></div><span class="required-note">* আবশ্যক</span></div>
+            <div class="form-grid">
+              <label class="form-field"><span>আবেদনকারীর পূর্ণ নাম <b>*</b></span><input name="fullName" type="text" autocomplete="name" required maxlength="120" placeholder="পাসপোর্ট অনুযায়ী নাম"></label>
+              <label class="form-field"><span>ইমেইল</span><input name="email" type="email" autocomplete="email" maxlength="160" placeholder="name@example.com"></label>
+              <label class="form-field"><span>মোবাইল নম্বর <b>*</b></span><input name="phone" type="tel" autocomplete="tel" required maxlength="32" placeholder="যে নম্বর দিয়ে sign-up করেছেন"></label>
+              <label class="form-field"><span>জন্মতারিখ <b>*</b></span><input name="dob" type="date" autocomplete="bday" required></label>
+              <label class="form-field"><span>Passport নম্বর <b>*</b></span><input name="passport" type="text" autocomplete="off" required maxlength="32" placeholder="পাসপোর্টের সঙ্গে হুবহু মিল"></label>
+              <label class="form-field"><span>NID নম্বর</span><input name="nid" type="text" autocomplete="off" maxlength="32" placeholder="যদি প্রযোজ্য হয়"></label>
+              <label class="form-field"><span>ভিসার ধরন</span><select name="visaType"><option value="">নির্বাচন করুন</option><option>Tourist</option><option>Medical</option><option>Business</option><option>Student</option><option>Employment</option><option>Other</option></select></label>
+              <label class="form-field"><span>IVAC কেন্দ্র</span><select name="center"><option value="">নির্বাচন করুন</option><option>Dhaka</option><option>Chattogram</option><option>Rajshahi</option><option>Sylhet</option><option>Khulna</option></select></label>
+            </div><div class="form-footer"><label class="remember-control"><input type="checkbox" id="remember-profile"><span>এই device-এ প্রোফাইলটি মনে রাখুন</span></label><button class="button button-primary" type="submit">তথ্য সংরক্ষণ <span>→</span></button></div><p class="inline-status" id="profile-status" role="status" aria-live="polite">প্রোফাইলের তথ্য এই browser-এর local storage-এ থাকবে—IndianVisaBuzz server-এ পাঠানো হবে না।</p>
+          </form><div class="callout warning-callout"><strong>গুরুত্বপূর্ণ</strong><span>IVAC portal অনুযায়ী sign-up-এর নাম, জন্মতারিখ, passport, mobile, email এবং NID (যদি লাগে) webfile-এর সঙ্গে হুবহু মিলতে হবে। সর্বশেষ নিয়ম official portal-এ যাচাই করুন।</span></div>
+        </section>
+
+        <section class="page-view" data-page="documents" aria-labelledby="documents-title" hidden>
+          <div class="page-heading"><div><p class="eyebrow">ফাইল প্রস্তুতি</p><h1 id="documents-title">ডকুমেন্ট চেকলিস্ট</h1><p class="intro-copy">সর্বোচ্চ চারটি PDF নির্বাচন করুন। এখানে ফাইল শুধু browser-এ বাছাই হয়; IndianVisaBuzz server-এ পাঠানো হয় না।</p></div><span class="count-pill"><strong id="doc-count">0</strong> / 4 PDF</span></div>
+          <div class="document-layout"><div class="panel document-panel"><div class="document-panel-head"><div><h2>PDF ফাইল নির্বাচন করুন</h2><p>প্রতি PDF সর্বোচ্চ 500 KB। Official checklist-এর সঙ্গে মিলিয়ে নিন।</p></div><span class="pdf-mark">PDF</span></div><label class="file-picker" for="document-picker"><span class="upload-mark" aria-hidden="true">↑</span><span><strong>PDF ফাইল নির্বাচন করুন</strong><small>একসঙ্গে সর্বোচ্চ ৪টি • .pdf • 500 KB পর্যন্ত</small></span><span class="button button-secondary picker-button">ফাইল বাছুন</span></label><input id="document-picker" type="file" accept="application/pdf,.pdf" multiple hidden><ul class="selected-files" id="selected-files" aria-live="polite"><li class="empty-files">এখনও কোনো ফাইল নির্বাচন করা হয়নি।</li></ul><div class="document-actions"><button class="button button-secondary" id="clear-files" type="button" disabled>সব সরান</button><span class="inline-status" id="document-status" role="status" aria-live="polite">নির্বাচিত PDF কেবল এই tab-এ থাকে।</span></div></div>
+            <aside class="panel checklist-panel"><p class="eyebrow">সাবমিটের আগে</p><h2>নিজে যাচাই করুন</h2><ul class="checklist"><li><span>✓</span>নথি সঠিক আবেদনকারীর কি না</li><li><span>✓</span>স্ক্যান স্পষ্ট ও সম্পূর্ণ কি না</li><li><span>✓</span>ফাইল 500 KB সীমার মধ্যে কি না</li><li><span>✓</span>portal-এর বর্তমান নথি-তালিকা মিলেছে কি না</li></ul><a class="text-action" href="https://hcidhaka.gov.in/pdf/Documents_required_for_visa1.pdf" target="_blank" rel="noopener noreferrer">অফিসিয়াল document list দেখুন ↗</a><p class="fine-print">এই checklist সহায়ক, অফিসিয়াল নথি-তালিকার বিকল্প নয়।</p></aside>
+          </div><div class="callout info-callout"><strong>নিরাপদ upload</strong><span>প্রতিটি PDF-এর visible document field আপনি বেছে নিন। একাধিক file গ্রহণ করা field হলে সেগুলো একসঙ্গে, অন্যথায় আলাদা field-এ আলাদা file attach হবে। field অনির্দিষ্ট বা populated হলে extension থামে; কিছু submit হয় না।</span></div>
+        </section>
+
+        <section class="page-view" data-page="slot-buddy" aria-labelledby="slot-title" hidden>
+          <div class="page-heading"><div><p class="eyebrow">Official source directory</p><h1 id="slot-title">Slot Buddy</h1><p class="intro-copy">সঠিক booking portal, সময়সূচির notice ও নিরাপত্তা-সতর্কতার সরাসরি উৎস। Live slot status নয়—চূড়ান্ত তথ্য official portal-এ দেখুন।</p></div><span class="source-pill"><span></span> third-party নয়</span></div>
+          <div class="slot-layout"><article class="panel availability-card"><div class="availability-head"><div><p class="eyebrow">পোর্টালে প্রদর্শিত সময়সূচি</p><h2>Slot booking-এর আগে</h2></div><span class="clock-icon" aria-hidden="true">◷</span></div><div class="schedule-row"><span>Webfile upload</span><strong>09:00 — 16:30</strong></div><div class="schedule-row"><span>পরবর্তী কর্মদিবসের slot*</span><strong>17:00</strong></div><p class="fine-print">*বর্তমান IVAC notice অনুযায়ী tourist visa ব্যতিক্রম। কার্যক্রম সীমিত এবং notice পরিবর্তনশীল হতে পারে।</p><ul class="slot-rules"><li>Sign-up-এর নাম, জন্মতারিখ, mobile, email, passport ও NID webfile-এর সঙ্গে মিলিয়ে নিন।</li><li>বর্তমান notice-এ ৩০ দিনের বেশি পুরোনো webfile গ্রহণ না করার কথা বলা হয়েছে।</li><li>Upload সফল হলে একই দিনের booking শেষ না হওয়া পর্যন্ত বদলানো যায় না; booking ব্যর্থ হলে পরের দিনে আবার upload লাগতে পারে।</li></ul><a class="button button-primary" href="https://appointment.ivacbd.com/" target="_blank" rel="noopener noreferrer">Official booking portal খুলুন <span>↗</span></a><div class="verified-line"><span class="verified-dot"></span><span>Source: appointment.ivacbd.com · সর্বশেষ যাচাই ১৫ অক্টোবর ২০২৬</span></div></article>
+            <article class="panel warning-card"><div class="warning-heading"><span class="warning-icon" aria-hidden="true">!</span><div><p class="eyebrow">প্রতারণা থেকে সতর্ক</p><h2>“Guaranteed slot” অফার এড়িয়ে চলুন</h2></div></div><p>IVAC-এর official advisory বলছে, slot নিশ্চিত করে দেওয়ার নামে তৃতীয় পক্ষের অর্থ দাবি বা “direct access” প্রচার প্রতারণামূলক হতে পারে। Slot booking-এর জন্য তৃতীয় পক্ষকে অর্থ দেবেন না।</p><a class="text-action" href="https://www.ivacbd.com/Beware-of-touts-and-agents" target="_blank" rel="noopener noreferrer">IVAC-এর advisory পড়ুন ↗</a></article>
+          </div><div class="section-heading source-heading"><div><p class="eyebrow">যাচাইকৃত প্রবেশপথ</p><h2>অফিসিয়াল উৎস</h2></div><span class="updated-label">সরাসরি উৎসে যান</span></div>
+          <div class="source-grid"><a class="source-card" href="https://appointment.ivacbd.com/" target="_blank" rel="noopener noreferrer"><span class="source-card-icon">↗</span><span><strong>IVAC Bangladesh appointment</strong><small>booking portal ও চলতি notice</small></span><span class="external-mark">↗</span></a><a class="source-card" href="https://www.ivacbd.com/" target="_blank" rel="noopener noreferrer"><span class="source-card-icon">⌂</span><span><strong>IVAC Bangladesh</strong><small>notice, application process ও centre info</small></span><span class="external-mark">↗</span></a><a class="source-card" href="https://hcidhaka.gov.in/pdf/Documents_required_for_visa1.pdf" target="_blank" rel="noopener noreferrer"><span class="source-card-icon">▤</span><span><strong>HCI Dhaka document list</strong><small>সরকারি নথি-তালিকার PDF</small></span><span class="external-mark">↗</span></a><a class="source-card" href="https://indianvisaonline.gov.in/" target="_blank" rel="noopener noreferrer"><span class="source-card-icon">◎</span><span><strong>Indian Visa Online</strong><small>ভারত সরকারের visa information portal</small></span><span class="external-mark">↗</span></a></div>
+          <p class="source-disclaimer">IndianVisaBuzz একটি স্বতন্ত্র preparation tool; IVAC, ভারতীয় হাইকমিশন বা ভারত সরকারের সঙ্গে অনুমোদিত/সম্পর্কিত সেবা নয়। এখানে slot availability scrape বা guarantee করা হয় না।</p>
+        </section>
+
+        <section class="page-view" data-page="extension" aria-labelledby="extension-title" hidden>
+          <div class="page-heading"><div><p class="eyebrow">Chrome extension</p><h1 id="extension-title">ব্রাউজারে সহায়ক</h1><p class="intro-copy">অফিসিয়াল portal-এ আপনার তথ্য পূরণ ও PDF attach করতে সাহায্য করে—চূড়ান্ত কাজ আপনার নিয়ন্ত্রণেই থাকে।</p></div><span class="extension-version">Manifest V3</span></div>
+          <div class="extension-layout"><article class="panel extension-main"><div class="extension-mark" aria-hidden="true"><span></span></div><p class="eyebrow">IndianVisaBuzz Extension</p><h2>রিপিট করা ধাপ কমান</h2><p>নিজে খোলা IVAC/visa portal-এ applicant profile field পূরণ করুন, চারটি পর্যন্ত PDF যাচাই করে প্রতিটির visible document field বেছে attach করুন, তারপর portal-এ ফলাফল দেখে পরবর্তী ধাপ নিজে নিন।</p><div class="feature-list"><div><span>01</span><strong>Profile autofill</strong><small>নাম, contact, passport/NID, visa type ও centre—মিলে গেলে</small></div><div><span>02</span><strong>চারটি PDF পর্যন্ত</strong><small>PDF signature/500 KB যাচাই; প্রতিটি target user বাছেন</small></div><div><span>03</span><strong>নিরাপদভাবে থামে</strong><small>কোনো automatic submit, CAPTCHA/OTP bypass বা slot booking নেই</small></div></div><a class="button button-primary extension-download" href="/indianvisabuzz-extension.zip" download>Extension ZIP ডাউনলোড <span>↓</span></a><p class="fine-print">Chrome desktop-এ unpacked extension হিসেবে load করতে হবে। ZIP-এ extension source code অন্তর্ভুক্ত।</p></article>
+            <aside class="panel install-panel"><p class="eyebrow">ইনস্টল গাইড</p><h2>৩টি ধাপ</h2><ol class="install-steps"><li><span>1</span><div><strong>ZIP extract করুন</strong><small>ডাউনলোড করা extension ফাইল একটি folder-এ extract করুন।</small></div></li><li><span>2</span><div><strong>Chrome Extensions খুলুন</strong><small><code>chrome://extensions</code> খুলে Developer mode চালু করুন।</small></div></li><li><span>3</span><div><strong>Load unpacked</strong><small>Extract করা <code>extension</code> folder নির্বাচন করুন। এরপর official portal খুলে extension icon চাপুন।</small></div></li></ol><div class="privacy-box"><strong>গোপনীয়তা</strong><p>Extension password, OTP, CAPTCHA, payment details, PDF content বা portal session cookie IndianVisaBuzz-এ পাঠায় না। Attach করলে browser file-টি official portal-এর input-এ দেয়; portal নিজস্ব নিয়মে সঙ্গে সঙ্গে upload করতে পারে। “Remember on this device” দিলে profile Chrome-এর local extension storage-এ থাকে।</p></div></aside>
+          </div><div class="callout warning-callout"><strong>আপনার review আবশ্যক</strong><span>File attach করলে official portal নিজস্ব নিয়মে সঙ্গে সঙ্গে upload করতে পারে। Portal-এ প্রতিটি তথ্য/ফাইল ও upload result দেখে নিন। CAPTCHA, OTP, consent, payment, final submission ও appointment selection নিজে সম্পন্ন করুন।</span></div>
+        </section>
+
+        <footer class="app-footer"><span>IndianVisaBuzz · আবেদন প্রস্তুতি সহায়ক</span><div><a href="https://www.ivacbd.com/" target="_blank" rel="noopener noreferrer">IVAC official source</a><span>·</span><a href="https://github.com/HumayunShariarHimu/IndianVisaBuzz" target="_blank" rel="noopener noreferrer">Source code</a></div><p>স্বতন্ত্র সহায়ক টুল; official visa authority নয়। সর্বশেষ নিয়ম মূল উৎসে যাচাই করুন।</p></footer>
       </div>
-      <p class="hero-note">No license key. No admin secret. Free for everyone.</p>
-    </div>
-    <div class="hero-visual">
-      <div class="hero-card free-card">
-        <div class="card-kicker">⚡ IndianVisaBuzz</div>
-        <div class="free-title">Free Forever</div>
-        <p class="free-copy">Start using the extension without activation or registration.</p>
-        <div class="free-status"><span class="status-check">✓</span><span>Ready to use</span></div>
-        <div class="feature-grid">
-          <div class="item"><span class="dot"></span> Auto Login</div>
-          <div class="item"><span class="dot"></span> OTP Verify</div>
-          <div class="item"><span class="dot"></span> PDF Upload</div>
-          <div class="item"><span class="dot"></span> Slot Booking</div>
-        </div>
-      </div>
-    </div>
+    </main>
   </div>
-</section>
-
-<section class="section" id="features">
-  <div class="container">
-    <h2 class="section-title">⚡ Key <span class="text-gradient">Features</span></h2>
-    <p class="section-sub">Four assisted automation tools designed to save time during repetitive browser steps.</p>
-    <div class="features">
-      <div class="feature-card"><div class="icon">🚀</div><h3>Auto Login</h3><p>Fill phone and password with one click. Complete CAPTCHA manually when prompted.</p></div>
-      <div class="feature-card"><div class="icon">📱</div><h3>OTP Verification</h3><p>Enter a six-digit OTP into single or split OTP fields on the portal.</p></div>
-      <div class="feature-card"><div class="icon">📎</div><h3>PDF Upload</h3><p>Upload one primary PDF and up to three extra files, up to 500 KB each.</p></div>
-      <div class="feature-card"><div class="icon">📅</div><h3>Slot Booking</h3><p>Find and select an available appointment date in the portal calendar.</p></div>
-    </div>
-  </div>
-</section>
-
-<section class="section" id="free">
-  <div class="container">
-    <h2 class="section-title">✅ <span class="text-gradient">Free Forever</span></h2>
-    <p class="section-sub">There is no license activation or admin setup in the current version.</p>
-    <div class="free-panel">
-      <div class="free-panel-icon">✓</div>
-      <div><strong>Ready to use</strong><p>Download the Chrome Extension, load it in Developer mode, open a supported visa portal, and start the four automation steps.</p></div>
-    </div>
-  </div>
-</section>
-
-<section class="section" id="howto">
-  <div class="container">
-    <h2 class="section-title">📖 How to <span class="text-gradient">Use</span></h2>
-    <p class="section-sub">Start in four simple steps.</p>
-    <div class="steps">
-      <div class="step-item"><div class="step-icon">🧩</div><h4>Install Extension</h4><p>Download the ZIP and load the extension folder in Chrome Developer mode.</p></div>
-      <div class="step-item"><div class="step-icon">🌐</div><h4>Open Visa Portal</h4><p>Open the supported portal and prepare your account, OTP and documents.</p></div>
-      <div class="step-item"><div class="step-icon">📝</div><h4>Prepare Details</h4><p>Enter phone, password, OTP, appointment date and PDF files in the widget.</p></div>
-      <div class="step-item"><div class="step-icon">⚡</div><h4>Run Automation</h4><p>Click Auto Login, Verify OTP, Upload File and Slot Booking in order.</p></div>
-    </div>
-  </div>
-</section>
-
-<section class="section" id="download">
-  <div class="container download-section">
-    <h2 class="section-title">📥 Get the <span class="text-gradient">Extension</span></h2>
-    <p class="section-sub">Free forever. No license key is required.</p>
-    <div class="download-actions">
-      <a href="/indianvisabuzz-extension.zip" class="btn btn-primary download-btn">⬇ Download Extension</a>
-      <a href="https://github.com/HumayunShariarHimu/IndianVisaBuzz" class="btn btn-outline download-btn">📦 View Source Code</a>
-    </div>
-    <p class="download-note">Chrome desktop is required for loading an unpacked extension.</p>
-  </div>
-</section>
-
-<footer class="footer">
-  <div class="container">
-    <div class="footer-links"><a href="#features">Features</a><a href="#howto">Guide</a><a href="https://github.com/HumayunShariarHimu/IndianVisaBuzz">GitHub</a><a href="/admin.html">Free Version</a></div>
-    <div><span class="brand">Indian<span>VisaBuzz</span></span> · Free Indian Visa Automation Assistant<div class="credit">Developed by Humayun Shariar Himu</div><div class="footer-disclaimer">© <span id="year"></span> · For assisted automation only · No API/server scraping</div></div>
-  </div>
-</footer>
-<script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
 </body>
 </html>
