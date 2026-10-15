@@ -59,3 +59,6 @@ html{color-scheme:dark;scrollbar-color:#2b4653 #080d16}
 .privacy-box strong,.slot-rules strong{color:#e4f3fc}
 .privacy-box p{color:#a9bbc8}
 .slot-rules li::marker{color:#b9ff66}
+
+/* Automation details disclosure */
+.automation-info{margin:0 0 30px;border:1px solid #2d4f50;border-radius:13px;background:#0e1b25;box-shadow:var(--shadow)}.automation-info summary{display:flex;align-items:center;gap:9px;padding:13px 15px;color:#dcecf3;font-size:11px;font-weight:700;cursor:pointer;list-style:none}.automation-info summary::-webkit-details-marker{display:none}.automation-info summary:focus-visible{outline:2px solid var(--teal);outline-offset:2px;border-radius:12px}.info-symbol{display:grid;place-items:center;width:21px;height:21px;border:1px solid var(--teal);border-radius:50%;color:var(--teal);font-family:Inter,sans-serif;font-size:11px}.info-hint{margin-left:auto;color:#8bf1e5;font-size:9px;font-weight:600}.automation-info-body{padding:0 18px 15px;border-top:1px solid #20383d;color:#b8cbd3;font-size:10px}.automation-info-body>p:first-child{margin:13px 0 10px}.automation-info-body ol{display:grid;gap:8px;margin:0;padding-left:20px}.automation-info-body li{padding-left:3px}.automation-info-body li strong{color:#e1f0f5}.automation-info-body .fine-print{margin-top:12px}
